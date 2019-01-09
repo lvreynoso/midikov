@@ -1,7 +1,8 @@
 html,
 body {
     height: 100%;
-    background-color: #6bffde
+    background-color: #ff007f
+    /* background-color: #ff63b1 */
 }
 
 .container {
@@ -13,7 +14,8 @@ body {
 
 /* Style The Dropdown Button */
 .dropbtn {
-  background-color: #4CAF50;
+  /* background-color: #4CAF50; */
+  /* background-color: #00e1ff; */
   color: white;
   padding: 16px;
   font-size: 16px;
@@ -22,7 +24,8 @@ body {
 }
 
 .btn-generate {
-  color: white;
+  background-color: #00e1ff;
+  color: black;
   padding: 16px;
   font-size: 16px;
   border: none;
