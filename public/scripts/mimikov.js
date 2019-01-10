@@ -1,7 +1,7 @@
 // mimikov.js
 
 const Timidity = require('timidity')
-const player = new Timidity()
+const player = new Timidity('scripts/')
 player.load('../midi/Legend of Zelda - Overworld.mid')
 window.onload = function() {
     document.getElementById('playButton').addEventListener('click', playButton)
