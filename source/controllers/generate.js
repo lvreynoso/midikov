@@ -32,7 +32,7 @@ generate.post('/', async (req, res) => {
     const sampleObject = {
         title: sampleMIDI.title,
         hex: sampleHex,
-        path: path
+        path: '/temp/test.midi'
     }
     const sampleJSON = JSON.stringify(sampleObject);
     res.status(200).send(sampleJSON);

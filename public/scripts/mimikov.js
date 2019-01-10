@@ -2,11 +2,15 @@
 
 const Timidity = require('timidity')
 const player = new Timidity('scripts/')
+
+var downloadPath = ''
+
 window.onload = function() {
     document.getElementById('generate').addEventListener('click', generateMIDI)
     document.getElementById('playButton').addEventListener('click', playButton)
     document.getElementById('pauseButton').addEventListener('click', pauseButton)
     document.getElementById('stopButton').addEventListener('click', stopButton)
+    document.getElementById('downloadButton').addEventListener('click', downloadButton)
 }
 
 async function generateMIDI(event) {
@@ -21,16 +25,13 @@ async function generateMIDI(event) {
     console.log(titlebar);
     titlebar.textContent = midiResponse.data.title;
     // update the download button path
-    let downloadButton = document.getElementById('downloadButton');
-    console.log(downloadButton);
-    let downloadText = downloadButton.textContent;
-    downloadButton.textContent = '';
-    let downloadLink = document.createElement('a');
-    let linkText = document.createTextNode(downloadText);
-    downloadLink.appendChild(linkText);
-    downloadLink.title = 'Download generated MIDI';
-    downloadLink.href = midiResponse.data.path;
-    downloadButton.appendChild(downloadLink);
+    downloadPath = midiResponse.data.path;
+    console.log(downloadPath);
+}
+
+function downloadButton(event) {
+    window.open(downloadPath);
+    console.log('Download me!');
 }
 
 function playButton(event) {
