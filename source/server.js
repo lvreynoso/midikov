@@ -13,6 +13,8 @@ import cookieParser from 'cookie-parser'
 
 // controllers
 import index from './controllers/index.js'
+import admin from './controllers/admin.js'
+import generate from './controllers/generate.js'
 
 // db and models
 import database from './database/database.js'
@@ -21,7 +23,7 @@ import database from './database/database.js'
 import exphbsConfig from './config/exphbs-config.js'
 const exphbs = handlebars.create(exphbsConfig);
 
-// whatevers
+// middleware
 import checkAuth from './lib/check-auth.js'
 import checkCookie from './lib/check-cookie.js'
 
@@ -44,6 +46,8 @@ app.set('view engine', 'handlebars');
 
 // routes
 app.use('/', index)
+app.use('/admin', admin)
+app.use('/generate', generate)
 
 // face the world
 const hotPort = app.get('port')
