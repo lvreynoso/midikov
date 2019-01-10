@@ -33,6 +33,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
+express.static.mime.types['wasm'] = 'application/wasm'
 app.use(expressValidator());
 app.use(cookieParser());
 app.use(checkCookie);
