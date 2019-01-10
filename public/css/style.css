@@ -32,6 +32,10 @@ body {
   cursor: pointer;
 }
 
+.btn-generate:hover {
+    background-color: #00c0dd;
+}
+
 .btn-download {
     color: #00e1ff;
 }

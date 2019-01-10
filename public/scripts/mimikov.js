@@ -11,10 +11,31 @@ window.onload = function() {
     document.getElementById('pauseButton').addEventListener('click', pauseButton)
     document.getElementById('stopButton').addEventListener('click', stopButton)
     document.getElementById('downloadButton').addEventListener('click', downloadButton)
+
+    document.getElementsByName('category').forEach(element => {
+        element.addEventListener('click', selectCategory)
+    })
+    document.getElementsByName('order').forEach(element => {
+        element.addEventListener('click', selectOrder)
+    })
+}
+
+function selectCategory(event) {
+    const selected = event.target.textContent;
+    let sourceButton = document.getElementById('sourceButton');
+    sourceButton.textContent = selected;
+}
+
+function selectOrder(event) {
+    const selected = event.target.textContent;
+    let orderButton = document.getElementById('orderButton');
+    orderButton.textContent = selected;
 }
 
 async function generateMIDI(event) {
-    const midiResponse = await axios.post('/generate', { category: 'Pokemon' });
+    const category = document.getElementById('sourceButton').textContent;
+    const order = document.getElementById('orderButton').textContent;
+    const midiResponse = await axios.post('/generate', { category: category, order: order });
     console.log(midiResponse);
     const midiBuffer = hexToBuffer(midiResponse.data.hex)
     console.log(midiBuffer);
