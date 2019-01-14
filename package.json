@@ -1,5 +1,5 @@
 {
-  "name": "mimikov",
+  "name": "midikov",
   "version": "1.0.0",
   "description": "A Node.js-based web app to generate MIDI music using markov chains",
   "main": "server.js",
@@ -12,21 +12,20 @@
     "test": "mocha --require @babel/polyfill --require @babel/register --exit",
     "clean": "rm -rf server && mkdir server",
     "build-server": "babel -d ./server ./source -s",
-    "build-front": "browserify . > ./public/scripts/bundle.js",
     "build": "npm run clean && npm run build-server",
     "start": "node ./server/server.js",
     "dev": "nodemon --exec babel-node -- ./source/server.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lvreynoso/mimikov.git"
+    "url": "git+https://github.com/lvreynoso/midikov.git"
   },
   "author": "Lucia Reynoso",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lvreynoso/mimikov/issues"
+    "url": "https://github.com/lvreynoso/midikov/issues"
   },
-  "homepage": "https://github.com/lvreynoso/mimikov#readme",
+  "homepage": "https://github.com/lvreynoso/midikov#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
