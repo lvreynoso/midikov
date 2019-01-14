@@ -8,8 +8,13 @@ const transformMIDI = (midi) => {
     let outputMidi = new midiFile();
     outputMidi.header.setFormat(midi.header.getFormat());
     console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
-    outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
+    // outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
     // outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
+    if (midi.header.getTimeDivision() === midi.Header.TICKS_PER_BEAT) {
+        outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
+    } else {
+        outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
+    }
 
     for (let index = 0; index < midi.tracks.length; index++) {
         outputMidi.addTrack(index);

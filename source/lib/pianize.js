@@ -8,8 +8,13 @@ const pianize = (midi) => {
     let outputMidi = new midiFile();
     outputMidi.header.setFormat(midi.header.getFormat());
     console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
-    outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
+    // outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
     // outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
+    if (midi.header.getTimeDivision() === midi.Header.TICKS_PER_BEAT) {
+        outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
+    } else {
+        outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
+    }
 
     for (let index = 0; index < midi.tracks.length; index++) {
         outputMidi.addTrack(index);
@@ -27,7 +32,7 @@ const pianize = (midi) => {
                 // midi notes are played by a "note on" event and they end when a "note off" event is called.
                 // they are of event type 0x8 and subtypes 0x9 for 'note on' and 0x8 for 'note off'.
                 return event;
-            } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER){
+            } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER) {
                 // synthesizer effects are applied by midi controller events. they are of type 0x8
                 // and subtype 0xb, and affect all tracks.
                 return event;
