@@ -10,7 +10,7 @@ const pianize = (midi) => {
     console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
     // outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
     // outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
-    if (midi.header.getTimeDivision() === midi.Header.TICKS_PER_BEAT) {
+    if (midi.header.getTimeDivision() === midiFile.Header.TICKS_PER_BEAT) {
         outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
     } else {
         outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
@@ -74,7 +74,23 @@ const pianize = (midi) => {
                 // type: 0xff, subtype: 0x59
                 // TRACK 0
                 return event;
+            } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PITCH_BEND) {
+                // fancy pitch bending. type 0x08, subtype 0xe.
+                return event;
+            } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_NOTE_AFTERTOUCH) {
+                // fancy note aftertouches. type 0x08, subtype 0xa.
+                return event;
+            } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CHANNEL_AFTERTOUCH) {
+                // fancy channel aftertouches. type 0x08, subtype 0xd.
+                return event;
+            } else if (event.type == midiEvents.EVENT_META) {
+                // all other meta events
+                return 99;
+            } else if (event.type == midiEvents.EVENT_SYSEX || event.type == midiEvents.EVENT_DIVSYSEX) {
+                // drop all system exclusive messages
+                return 99;
             } else {
+                // TODO: drop 0xff-0x20, 0xff-0x7f
                 console.log(event);
                 return event;
             }

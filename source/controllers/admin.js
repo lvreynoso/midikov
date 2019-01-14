@@ -18,7 +18,7 @@ admin.get('/', (req, res) => {
     res.render('admin', { currentUser })
 })
 
-admin.post('/upload', upload.array('midis', 24), async (req, res) => {
+admin.post('/upload', upload.array('midis', 64), async (req, res) => {
     const category = req.body.category;
     req.files.forEach( async file => {
         let newMidi = new MIDIFile();
@@ -29,7 +29,7 @@ admin.post('/upload', upload.array('midis', 24), async (req, res) => {
 
         // pianize the MIDI file
         let midiJS = readMIDI(file.buffer);
-        let pianoVersion = transformMIDI(midiJS);
+        let pianoVersion = pianize(midiJS);
         newMidi.data = Buffer.from(pianoVersion.getContent());
 
         const savedMidi = await newMidi.save().catch(err => { console.log(err); })

@@ -4,9 +4,9 @@
 import midiFile from 'midifile'
 import fs from 'fs'
 
-const writeMIDI = (midi) => {
-    let binaryData = Buffer.from(midi.getContent());
-    let path = 'public/temp/transform.midi';
+const writeMIDI = (midi, filename) => {
+    let binaryData = midi;
+    let path = `public/temp/${filename}.midi`;
     let writeStream = fs.createWriteStream(path);
     writeStream.write(binaryData, 'hex');
     writeStream.on('finish', () => {

@@ -53,16 +53,23 @@ generate.post('/', async (req, res) => {
 // --> write midi to file
 generate.get('/test', async (req, res) => {
     // pull test midi from the data base
-    const testCategory = 'TestConversion'
+    const testCategory = 'Testing';
     const query = {
         category: testCategory
-    }
-    const testMidiDBObject = await MIDIFile.findOne(query).catch(err => { console.log(err) });
-    let testMidi = readMIDI(testMidiDBObject.data);
-    let transformedMIDI = transformMIDI(testMidi);
-    writeMIDI(transformedMIDI);
+    };
+    const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
+    let name = 'test_pianized_';
+    let counter = 1;
+    testMidiDBObjects.forEach(midi => {
+        let filename = `${name}${counter}`;
+        writeMIDI(midi.data, filename);
+        counter += 1;
+    })
+    // let testMidi = readMIDI(testMidiDBObjects[0].data);
+    // let transformedMIDI = transformMIDI(testMidi);
+    // writeMIDI(testMIDI);
 
-    res.render('test')
+    res.render('test');
 
 })
 
