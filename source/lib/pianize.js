@@ -1,9 +1,9 @@
-// transform-midi.js
+// pianize.js
 
 import midiFile from 'midifile'
 import midiEvents from 'midievents'
 
-const transformMIDI = (midi) => {
+const pianize = (midi) => {
     // copy the midi data
     let outputMidi = new midiFile();
     outputMidi.header.setFormat(midi.header.getFormat());
@@ -82,14 +82,14 @@ const transformMIDI = (midi) => {
             }
         })
         console.log(`Track ${index} has ${filteredTrackEvents.length} events.`);
-        if (index == 0 || index == 4 || index == 5) {
-            filteredTrackEvents.forEach(element => {
-                console.log(element);
-            })
-        }
+        // if (index == 0 || index == 4 || index == 5) {
+        //     filteredTrackEvents.forEach(element => {
+        //         console.log(element);
+        //     })
+        // }
         outputMidi.setTrackEvents(index, filteredTrackEvents);
     }
     return outputMidi;
 }
 
-export default transformMIDI;
+export default pianize;
