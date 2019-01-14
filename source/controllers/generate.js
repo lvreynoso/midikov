@@ -11,7 +11,11 @@ import fs from 'fs'
 import MIDIFile from '../models/MIDIFile.js'
 
 // midi manipulation
+import midiFile from 'midifile'
+import midiEvents from 'midievents'
 import readMIDI from '../lib/read-midi.js'
+import writeMIDI from '../lib/write-midi.js'
+import transformMIDI from '../lib/transform-midi.js'
 
 generate.post('/', async (req, res) => {
     // pull the midi from the database
@@ -53,19 +57,12 @@ generate.get('/test', async (req, res) => {
     const query = {
         category: testCategory
     }
-    const testMidi = await MIDIFile.findOne(query).catch(err => { console.log(err) });
-    let testEvents = readMIDI(testMidi.data);
-    console.log(testEvents);
-    // testEvents.forEach(midiEvent => {
-    //     console.log('Event:');
-    //     console.log(`Subtype: ${midiEvent.subtype}`);
-    //     console.log(`Play time: ${midiEvent.playTime}`);
-    //     console.log(`Param 1: ${midiEvent.param1}`);
-    //     console.log(`Param 2: ${midiEvent.param2}`);
-    //     console.log('------');
-    // })
+    const testMidiDBObject = await MIDIFile.findOne(query).catch(err => { console.log(err) });
+    let testMidi = readMIDI(testMidiDBObject.data);
+    let transformedMIDI = transformMIDI(testMidi);
+    writeMIDI(transformedMIDI);
 
-    res.render('test', { testEvents })
+    res.render('test')
 
 })
 

@@ -2,12 +2,15 @@
 // convert the binary data of a MIDI file into a sequence of events
 // that we can manipulate
 
-import midifile from 'midifile'
+import midiFile from 'midifile'
 
 const readMIDI = (binaryData) => {
-    let decodedFile = new midifile(binaryData);
+    let decodedFile = new midiFile(binaryData);
+    // console.log(decodedFile);
+    console.log(`Track count: ${decodedFile.header.getTracksCount()}`);
     let events = decodedFile.getMidiEvents();
-    return events;
+    // console.log(events[0]);
+    return decodedFile;
 }
 
 export default readMIDI;
