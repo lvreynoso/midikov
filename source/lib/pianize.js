@@ -2,6 +2,7 @@
 
 import midiFile from 'midifile'
 import midiEvents from 'midievents'
+import hexToNote from './noteMap.js'
 
 const pianize = (midi) => {
     // copy the midi data
@@ -31,6 +32,13 @@ const pianize = (midi) => {
             } else if (event.type == midiEvents.EVENT_MIDI && (event.subtype == midiEvents.EVENT_MIDI_NOTE_OFF || event.subtype == midiEvents.EVENT_MIDI_NOTE_ON)) {
                 // midi notes are played by a "note on" event and they end when a "note off" event is called.
                 // they are of event type 0x8 and subtypes 0x9 for 'note on' and 0x8 for 'note off'.
+                if (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON) {
+                    let indexHex = parseInt(event.index, 16);
+                    let indexString = indexHex.toString(10)
+                    console.log(`Event at time ${indexString}`);
+                    let note = hexToNote(event.param1);
+                    console.log(`${note} played ${event.delta} clocks after the preceding event.`);
+                }
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER) {
                 // synthesizer effects are applied by midi controller events. they are of type 0x8

@@ -23,7 +23,10 @@ admin.post('/upload', upload.array('midis', 64), async (req, res) => {
     req.files.forEach( async file => {
         let newMidi = new MIDIFile();
         console.log(`Processing ${file.originalname}`);
-        newMidi.title = file.originalname;
+        // let re = /^(.+)(\.[^ .]+)?$/g;
+        let re = /(\.[^ .]+)?$/g;
+        let regexedTitle = file.originalname.replace(re, '');
+        newMidi.title = regexedTitle;
         newMidi.library = true;
         newMidi.category = category;
 

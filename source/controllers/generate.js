@@ -16,6 +16,7 @@ import midiEvents from 'midievents'
 import readMIDI from '../lib/read-midi.js'
 import writeMIDI from '../lib/write-midi.js'
 import transformMIDI from '../lib/transform-midi.js'
+import generateMIDI from '../lib/generate-midi.js'
 
 generate.post('/', async (req, res) => {
     // pull the midi from the database
@@ -45,23 +46,41 @@ generate.post('/', async (req, res) => {
     res.status(200).send(sampleJSON);
 });
 
-// testing:
-// --> read midi from database
-// --> convert midi to json
-// --> change instrument to piano
-// --> convert back to midi
-// --> write midi to file
+// test Markov generation
 generate.get('/test', async (req, res) => {
     // pull test midi from the data base
-    const testCategory = 'Testing';
+    const testCategory = 'test';
     const query = {
         category: testCategory
     };
     const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
-    let name = 'test_pianized_';
+    let markovSources = testMidiDBObjects.map(midi => {
+        let midiJSON = readMIDI(midi.data);
+        return midiJSON;
+    })
+
+    let generatedMidi = generateMIDI(markovSources);
+    let generatedMidiBinary = Buffer.from(generatedMidi.getContent());
+    writeMIDI(generatedMidiBinary, 'test_generate')
+
+    res.render('test');
+
+})
+
+// testing:
+// --> read midi from database
+// --> write midi to file
+generate.get('/write-test', async (req, res) => {
+    // pull test midi from the data base
+    const testCategory = 'test';
+    const query = {
+        category: testCategory
+    };
+    const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
+    let name = '_pianized_';
     let counter = 1;
     testMidiDBObjects.forEach(midi => {
-        let filename = `${name}${counter}`;
+        let filename = `${counter}${name}${midi.title}`;
         writeMIDI(midi.data, filename);
         counter += 1;
     })
