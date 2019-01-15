@@ -66,8 +66,12 @@ const assemble = (midiData) => {
         subtype: 0x2f,
         length: 0x00
     }
-    trackZeroEvents.push(timeSignature);
-    trackZeroEvents.push(tempoEvent);
+    if (timeSignature != undefined) {
+        trackZeroEvents.push(timeSignature);
+    }
+    if (tempoEvent != undefined) {
+        trackZeroEvents.push(tempoEvent);
+    }
     trackZeroEvents.push(endOfTrackZero);
     outputMidi.setTrackEvents(0, trackZeroEvents)
 
@@ -110,7 +114,9 @@ const assemble = (midiData) => {
             channel: trackChannel,
             param1: 0x00
         }
-        trackEvents.push(trackKeySignature);
+        if (trackKeySignature != undefined) {
+            trackEvents.push(trackKeySignature);
+        }
         trackEvents.push(trackProgram);
 
         // convert each 'Note' to a pair of MIDI events: note on and note off.
@@ -179,9 +185,9 @@ const assemble = (midiData) => {
             let currentTime = parseInt(time, 10);
             noteTracker[time].forEach(event => {
                 event.delta = currentTime - previousTick;
-                if (event.delta > 0x300) {
-                    console.log(event);
-                }
+                // if (event.delta > 0x300) {
+                //     console.log(event);
+                // }
                 trackEvents.push(event);
                 previousTick = currentTime;
             })
