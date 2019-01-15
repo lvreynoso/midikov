@@ -18,7 +18,6 @@ const analyze = (midi) => {
         outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
         console.log(`${midi.header.getSMPTEFrames()}, ${midi.header.getTicksPerFrame()}`);
     }
-    // console.log(`${midi.header.getSMPTEFrames()}, ${midi.header.getTicksPerFrame()}`);
 
     for (let index = 0; index < midi.tracks.length; index++) {
         outputMidi.addTrack(index);

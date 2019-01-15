@@ -11,6 +11,22 @@ import midiEvents from 'midievents'
 const transformMIDI = (midi) => {
 
     let trackNotes = {};
+    let metaData = {
+        ticksPerBeat: undefined,
+        SMPTEFrames: undefined,
+        ticksPerFrame: undefined,
+        keySignature: undefined,
+        timeSignature: undefined,
+        tempo: undefined
+    }
+
+    if (midi.header.getTimeDivision() === midiFile.Header.TICKS_PER_BEAT) {
+        metaData.ticksPerBeat = midi.header.getTicksPerBeat();
+    } else {
+        metaData.SMPTEFrames = midi.header.getSMPTEFrames();
+        metaData.ticksPerFrame = midi.header.getTicksPerFrame();
+    }
+
     for (let index = 0; index < midi.tracks.length; index++) {
         let notes = [];
         let noteTracker = {};
@@ -79,6 +95,9 @@ const transformMIDI = (midi) => {
                 // the tempo parameter is the number of microseconds per quarter note.
                 // Divide 60,000,000 / this parameter and you get the bpm of the song.
                 // TRACK 0
+                if (metaData.tempo == undefined) {
+                    metaData.tempo = event;
+                }
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_TIME_SIGNATURE) {
                 // used to change the time signature of a track. parameters are as follows:
@@ -88,6 +107,9 @@ const transformMIDI = (midi) => {
                 // 4: number of notated 32nd notes in a MIDI quarter-note. usually 8.
                 // type: 0xff, subtype: 0x58
                 // TRACK 0
+                if (metaData.timeSignature == undefined) {
+                    metaData.timeSignature = event;
+                }
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_KEY_SIGNATURE) {
                 // this event has two properties: key and scale. the key property specifies
@@ -96,6 +118,9 @@ const transformMIDI = (midi) => {
                 // the scale property is 0 for a major key, and 1 for a minor key.
                 // type: 0xff, subtype: 0x59
                 // TRACK 0
+                if (metaData.keySignature == undefined) {
+                    metaData.keySignature = event;
+                }
                 return event;
             } else {
                 console.log(event);
@@ -117,8 +142,11 @@ const transformMIDI = (midi) => {
             // console.log(`Deleted track ${track}`);
         }
     });
-
-    return trackNotes;
+    let midiData = {
+        trackNotes: trackNotes,
+        metaData: metaData
+    }
+    return midiData;
 }
 
 class Note {

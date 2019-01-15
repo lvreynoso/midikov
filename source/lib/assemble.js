@@ -10,12 +10,20 @@ import midiEvents from 'midievents'
 // tempo 451127
 // key: 0, scale: 0 (C Major)
 
-const assemble = (notes) => {
+const assemble = (midiData) => {
+    // debugging
+    console.log(midiData.metaData);
+
+
     let outputMidi = new midiFile();
     // Using MIDI Format Type 1
     outputMidi.header.setFormat(1);
     // Set ticks per beat
-    outputMidi.header.setTicksPerBeat(0x0180);
+    if (midiData.metaData.ticksPerBeat != undefined) {
+        outputMidi.header.setTicksPerBeat(midiData.metaData.ticksPerBeat);
+    } else {
+        outputMidi.header.setSMPTEDivision(midiData.metaData.SMPTEFrames, midiData.metaData.ticksPerFrame);
+    }
 
     // *********************
     // Track 0: Meta stuff
@@ -23,25 +31,27 @@ const assemble = (notes) => {
     outputMidi.addTrack(0);
     let trackZeroEvents = [];
     // Time signature
-    let timeSignature = {
-        delta: 0x00,
-        type: 0xff,
-        subtype: 0x58,
-        length: 0x04,
-        data: [0x04, 0x02, 0x60, 0x08],
-        param1: 0x04,
-        param2: 0x02,
-        param3: 0x60,
-        param4: 0x08
-    }
+    let timeSignature = midiData.metaData.timeSignature;
+    // let timeSignature = {
+    //     delta: 0x00,
+    //     type: 0xff,
+    //     subtype: 0x58,
+    //     length: 0x04,
+    //     data: [0x04, 0x02, 0x60, 0x08],
+    //     param1: 0x04,
+    //     param2: 0x02,
+    //     param3: 0x60,
+    //     param4: 0x08
+    // }
     // MIDI Tempo (bpm)
-    let tempoEvent = {
-        delta: 0x00,
-        type: 0xff,
-        subtype: 0x51,
-        length: 0x03,
-        tempo: 0x06e237,
-    }
+    let tempoEvent = midiData.metaData.tempo;
+    // let tempoEvent = {
+    //     delta: 0x00,
+    //     type: 0xff,
+    //     subtype: 0x51,
+    //     length: 0x03,
+    //     tempo: 0x06e237,
+    // }
     let trackZeroProgram = {
         delta: 0x00,
         type: 0x08,
@@ -67,7 +77,7 @@ const assemble = (notes) => {
 
     // first figure out how many tracks are in the input object
     // then loop through and write the tracks
-    let trackNumbers = Object.keys(notes);
+    let trackNumbers = Object.keys(midiData.trackNotes);
     console.log(`Tracks to write: ${trackNumbers}`);
     trackNumbers.sort((a, b) => {
         return parseInt(a, 10) - parseInt(b, 10);
@@ -76,21 +86,22 @@ const assemble = (notes) => {
     trackNumbers.forEach(trackIndex => {
         console.log(`Writing track ${trackIndex}`);
         outputMidi.addTrack(trackIndex);
-        let trackNotes = notes[trackIndex];
+        let trackNotes = midiData.trackNotes[trackIndex];
         // gets the wrong channel for some reason
         let trackChannel = trackNotes[0].channel;
         console.log(`Instrument Channel: ${trackChannel}`);
         // all track events
         let trackEvents = [];
         // Key signature
-        let trackKeySignature = {
-            delta: 0x00,
-            type: 0xff,
-            subtype: 0x59,
-            length: 0x02,
-            key: 0x00,
-            scale: 0x00
-        }
+        let trackKeySignature = midiData.metaData.keySignature;
+        // let trackKeySignature = {
+        //     delta: 0x00,
+        //     type: 0xff,
+        //     subtype: 0x59,
+        //     length: 0x02,
+        //     key: 0x00,
+        //     scale: 0x00
+        // }
         // Program Change (Set the instrument)
         let trackProgram = {
             delta: 0x00,
