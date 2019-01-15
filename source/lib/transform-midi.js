@@ -3,34 +3,64 @@
 import midiFile from 'midifile'
 import midiEvents from 'midievents'
 
+// ALL EVENT NUMBERS ARE IN HEX
+// even though console.log() displays decimal numbers
+
+// don't forget to keep track of how many channels there are too
+
 const transformMIDI = (midi) => {
-    // copy the midi data
-    let outputMidi = new midiFile();
-    outputMidi.header.setFormat(midi.header.getFormat());
-    console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
-    // outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
-    // outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
-    if (midi.header.getTimeDivision() === midi.Header.TICKS_PER_BEAT) {
-        outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
-    } else {
-        outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
-    }
+
+    // let markovMap = {
+    //     notes: {
+    //         track: {
+    //
+    //         }
+    //     }
+    // }
+
+    // let notes = [];
+    let trackNotes = [];
 
     for (let index = 0; index < midi.tracks.length; index++) {
-        outputMidi.addTrack(index);
+        let notes = [];
+        let noteTracker = {};
+        let deltaTime = 0;
         let trackEvents = midi.getTrackEvents(index);
         let newTrackEvents = trackEvents.map(event => {
+            // first update the delta time.
+            deltaTime += event.delta;
+            // console.log(`Added ${event.delta} of delta time.`);
             // change of instrument events are called "midi program" events.
             // they are of event type 0x8 and subtype 0xc.
             if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PROGRAM_CHANGE) {
-                event.param1 = 0;
                 return event;
-            } else if (event.channel == 0x9) {
-                // percussion instruments live in event channel 0x9.
-                return 99;
-            } else if (event.type == midiEvents.EVENT_MIDI && (event.subtype == midiEvents.EVENT_MIDI_NOTE_OFF || event.subtype == midiEvents.EVENT_MIDI_NOTE_ON)) {
+            } else if (event.type == midiEvents.EVENT_MIDI && (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON || event.subtype == midiEvents.EVENT_MIDI_NOTE_OFF)) {
                 // midi notes are played by a "note on" event and they end when a "note off" event is called.
                 // they are of event type 0x8 and subtypes 0x9 for 'note on' and 0x8 for 'note off'.
+
+                // first we check if there is a note for this pitch in the note tracker;
+                // if so, we end that note and start a new one
+                let noteFound = false;
+                let trackerKeys = Object.keys(noteTracker);
+                for (let i = 0; i < trackerKeys.length; i++) {
+                    if (trackerKeys[i] == event.param1) {
+                        noteFound = true;
+                    }
+                }
+                // if there is already a note for that pitch, end it
+                if (noteFound == true) {
+                    let finishedNote = noteTracker[event.param1];
+                    finishedNote.off(deltaTime);
+                    notes.push(finishedNote);
+                    delete noteTracker[event.param1];
+                }
+
+                // put a new note in the tracker
+                if (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON) {
+                    let newNote = new Note(event, deltaTime);
+                    noteTracker[event.param1] = newNote;
+                }
+
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER){
                 // synthesizer effects are applied by midi controller events. they are of type 0x8
@@ -39,9 +69,6 @@ const transformMIDI = (midi) => {
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_END_OF_TRACK) {
                 // the end of a track is signalled by an event of type 0xff and subtype 0x2f.
                 return event;
-            } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_TRACK_NAME) {
-                // track names are in events of type 0xff and subtype 0x3.
-                return 99;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_SET_TEMPO) {
                 // this is a meta midi event that sets the tempo (bpm) of the entire song (all tracks).
                 // they are of type 0xff and subtype 0x51.
@@ -49,14 +76,6 @@ const transformMIDI = (midi) => {
                 // Divide 60,000,000 / this parameter and you get the bpm of the song.
                 // TRACK 0
                 return event;
-            } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_MARKER) {
-                // this midi 'meta' marker event is simply a marker - it does the same function
-                // for a midi file as comments do for software code.
-                // type 0xff, subtype 0x06.
-                return 99;
-            } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_COPYRIGHT_NOTICE) {
-                // a copyright notice. type 0xff, subtype 0x02.
-                return 99;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_TIME_SIGNATURE) {
                 // used to change the time signature of a track. parameters are as follows:
                 // 1: numerator of the time signature
@@ -79,22 +98,31 @@ const transformMIDI = (midi) => {
                 return event;
             }
         });
-        let filteredTrackEvents = newTrackEvents.filter(element => {
-            if (element == 99) {
-                return false
-            } else {
-                return true
-            }
-        })
-        console.log(`Track ${index} has ${filteredTrackEvents.length} events.`);
-        if (index == 0 || index == 4 || index == 5) {
-            filteredTrackEvents.forEach(element => {
-                console.log(element);
-            })
-        }
-        outputMidi.setTrackEvents(index, filteredTrackEvents);
+        // console.log(`Track ${index} has ${newTrackEvents.length} events.`);
+        // let leftovers = Object.keys(noteTracker);
+        // console.log(`Note tracker has ${leftovers.length} leftovers.`)
+        // console.log(notes);
+        trackNotes.push(notes);
     }
-    return outputMidi;
+    // console.log(trackNotes);
+    return trackNotes;
+}
+
+class Note {
+    constructor(event, time) {
+        this.pitch = event.param1;
+        this.velocity = event.param2;
+        this.delta = event.delta;
+        this.channel = event.channel;
+        this.startIndex = time;
+        this.endIndex = 0x00;
+        this.duration = 0x00;
+    }
+
+    off(time) {
+        this.endIndex = time;
+        this.duration = this.endIndex - this.startIndex;
+    }
 }
 
 export default transformMIDI;

@@ -4,12 +4,15 @@ import midiFile from 'midifile'
 import midiEvents from 'midievents'
 
 const generate = (sourceArray) => {
+    return sampleMidi();
+}
 
+function sampleMidi() {
+    
 }
 
 function makeMidiNoteMarkovMap(tokenList, order) {
     let markovMap = {};
-    
 }
 
 class Queue {

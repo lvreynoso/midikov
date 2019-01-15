@@ -15,6 +15,7 @@ import cookieParser from 'cookie-parser'
 import index from './controllers/index.js'
 import admin from './controllers/admin.js'
 import generate from './controllers/generate.js'
+import test from './controllers/test.js'
 
 // db and models
 import database from './database/database.js'
@@ -48,6 +49,7 @@ app.set('view engine', 'handlebars');
 app.use('/', index)
 app.use('/admin', admin)
 app.use('/generate', generate)
+app.use('/test', test)
 
 // face the world
 const hotPort = app.get('port')
