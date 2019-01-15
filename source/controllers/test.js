@@ -27,6 +27,25 @@ test.get('/', (req, res) => {
     res.render('test');
 })
 
+test.get('/generate', async (req, res) => {
+    // pull test midis from the data base
+    const testCategory = 'Pokemon';
+    const query = {
+        category: testCategory
+    };
+    const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
+    const midiObjects = testMidiDBObjects.map(dbEntry => {
+        const convertedMidi = readMIDI(dbEntry.data);
+        const deconstructedMidi = transformMIDI(convertedMidi);
+        return deconstructedMidi;
+    });
+    // test with order 1
+    let markovData = generateMap(midiObjects, 1, testCategory);
+    generateMIDI(markovData);
+
+    res.redirect('/test');
+})
+
 test.get('/map', async (req, res) => {
     // pull test midis from the data base
     const testCategory = 'Pokemon';
