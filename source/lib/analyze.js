@@ -54,8 +54,8 @@ const analyze = (midi) => {
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER) {
                 // synthesizer effects are applied by midi controller events. they are of type 0x8
                 // and subtype 0xb, and affect all tracks.
-                console.log(`Synthesizer effect on Track ${index}`);
-                console.log(event);
+                // console.log(`Synthesizer effect on Track ${index}`);
+                // console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_END_OF_TRACK) {
                 // the end of a track is signalled by an event of type 0xff and subtype 0x2f.
@@ -71,8 +71,8 @@ const analyze = (midi) => {
                 // the tempo parameter is the number of microseconds per quarter note.
                 // Divide 60,000,000 / this parameter and you get the bpm of the song.
                 // TRACK 0
-                // console.log(`SET TEMPO event on Track ${index}`);
-                // console.log(event);
+                console.log(`SET TEMPO event on Track ${index}`);
+                console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_MARKER) {
                 // this midi 'meta' marker event is simply a marker - it does the same function
@@ -100,8 +100,8 @@ const analyze = (midi) => {
                 // the scale property is 0 for a major key, and 1 for a minor key.
                 // type: 0xff, subtype: 0x59
                 // TRACK 0
-                // console.log(`Set key signature on Track ${index}`);
-                // console.log(event);
+                console.log(`Set key signature on Track ${index}`);
+                console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PITCH_BEND) {
                 // fancy pitch bending. type 0x08, subtype 0xe.
@@ -117,8 +117,8 @@ const analyze = (midi) => {
                 return event;
             } else if (event.type == midiEvents.EVENT_META) {
                 // all other meta events
-                console.log(`Other meta event on Track ${index}`);
-                console.log(event);
+                // console.log(`Other meta event on Track ${index}`);
+                // console.log(event);
                 return 99;
             } else if (event.type == midiEvents.EVENT_SYSEX || event.type == midiEvents.EVENT_DIVSYSEX) {
                 // drop all system exclusive messages

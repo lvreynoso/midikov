@@ -34,15 +34,7 @@ const transformMIDI = (midi) => {
         // keep track of delta between note on events
         let alpha = 0x000000;
         let trackEvents = midi.getTrackEvents(index);
-        // if (index < 4) {
-        //     console.log(`Track ${index}`);
-        //     console.log(trackEvents[0]);
-        //     console.log(trackEvents[1]);
-        //     console.log(trackEvents[2]);
-        //     console.log(trackEvents[3]);
-        //     console.log(trackEvents[4]);
-        //     console.log(trackEvents[5]);
-        // }
+
         let newTrackEvents = trackEvents.map(event => {
             // first update the delta time.
             deltaTime += event.delta;
