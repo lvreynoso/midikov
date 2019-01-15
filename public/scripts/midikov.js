@@ -35,6 +35,9 @@ function selectOrder(event) {
 async function generateMIDI(event) {
     const category = document.getElementById('sourceButton').textContent;
     const order = document.getElementById('orderButton').textContent;
+    if (category == 'Music Source' || order == 'Markov Order') {
+        return;
+    }
     const midiResponse = await axios.post('/generate', { category: category, order: order });
     console.log(midiResponse);
     const midiBuffer = hexToBuffer(midiResponse.data.hex)
