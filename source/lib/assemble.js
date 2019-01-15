@@ -40,7 +40,7 @@ const assemble = (notes) => {
         type: 0xff,
         subtype: 0x51,
         length: 0x03,
-        tempo: 0x61a8,
+        tempo: 0x06e237,
     }
     let trackZeroProgram = {
         delta: 0x00,
@@ -77,6 +77,7 @@ const assemble = (notes) => {
         console.log(`Writing track ${trackIndex}`);
         outputMidi.addTrack(trackIndex);
         let trackNotes = notes[trackIndex];
+        // gets the wrong channel for some reason
         let trackChannel = trackNotes[0].channel;
         console.log(`Instrument Channel: ${trackChannel}`);
         // all track events
@@ -107,7 +108,7 @@ const assemble = (notes) => {
             delta: 0x00,
             type: 0x08,
             subtype: 0x09,
-            channel: 0x02,
+            channel: 0x00,
             param1: 0x00,
             param2: 0x00
         }
@@ -115,7 +116,7 @@ const assemble = (notes) => {
             delta: 0x00,
             type: 0x08,
             subtype: 0x08,
-            channel: 0x02,
+            channel: 0x00,
             param1: 0x00,
             param2: 0x00
         }
@@ -126,11 +127,18 @@ const assemble = (notes) => {
         // THEN go through the hashmap and assemble events
         // calculate deltas by the distance between ticks
         let noteTracker = {};
-        let ticks = 0x000000;
+        let ticks = 0;
         trackNotes.forEach(note => {
+            // if (note.alpha > 0x300) {
+            //     note.alpha = 0x300;
+            // }
+            // if (note.duration > 0x300) {
+            //     note.duration = 0x300;
+            // }
             ticks += note.alpha;
             // add the on event
             let noteOn = Object.assign({}, noteOnTemplate);
+            noteOn.channel = note.channel;
             noteOn.param1 = note.pitch;
             noteOn.param2 = note.velocity;
             if (noteTracker[ticks] == undefined) {
@@ -140,6 +148,7 @@ const assemble = (notes) => {
             }
             // add the off event
             let noteOff = Object.assign({}, noteOffTemplate);
+            noteOff.channel = note.channel;
             noteOff.param1 = note.pitch;
             noteOff.param2 = note.velocity;
             let offPosition = ticks + note.duration;
@@ -150,15 +159,18 @@ const assemble = (notes) => {
             }
         })
         // now go through the hashmap in order and calculate deltas
-        let previousTick = 0x000000;
+        let previousTick = 0;
         let times = Object.keys(noteTracker);
         times.sort((a, b) => {
-            return parseInt(a, 16) - parseInt(b, 16);
+            return parseInt(a, 10) - parseInt(b, 10);
         })
         times.forEach(time => {
-            let currentTime = parseInt(time, 16);
+            let currentTime = parseInt(time, 10);
             noteTracker[time].forEach(event => {
                 event.delta = currentTime - previousTick;
+                if (event.delta > 0x300) {
+                    console.log(event);
+                }
                 trackEvents.push(event);
                 previousTick = currentTime;
             })
@@ -166,76 +178,22 @@ const assemble = (notes) => {
 
         // console.log(noteTracker);
 
-
-        // algorithm the first
-        // flawed
-        // let ticks = 0x000000;
-        // for the note tracker,
-        // keys are delta ticks;
-        // values are an array of note off events
-        // let noteTracker = {};
-        // let runningDelta = 0x00;
-        // for (let index = 0; index < notes[trackIndex].length; index++) {
-        //     // get the Note
-        //     let keyPress = notes[trackIndex][index];
-        //     // check the delta; move up ticks if necessary
-        //     if (keyPress.delta > 0x00) {
-        //         // time to move up ticks;
-        //         for (let i = ticks; i <= (ticks + keyPress.delta); i++) {
-        //             if (noteTracker[i] != undefined) {
-        //                 // there are note off events that need to fire
-        //                 noteTracker[i].forEach(event => {
-        //                     event.delta = runningDelta;
-        //                     trackEvents.push(event);
-        //                     runningDelta = 0x00;
-        //                 })
-        //             }
-        //             runningDelta += 0x01;
-        //         }
-        //     }
-        //     // create a note on event
-        //     let noteOn = Object.assign({}, noteOnTemplate);
-        //     noteOn.delta = runningDelta;
-        //     noteOn.channel = keyPress.channel;
-        //     noteOn.param1 = keyPress.pitch;
-        //     noteOn.param2 = keyPress.velocity;
-        //     // push the event to the tracklist
-        //     trackEvents.push(noteOn);
-        //     runningDelta = 0x00;
-        //     // create the corresponding note off event;
-        //     let noteOff = Object.assign({}, noteOffTemplate);
-        //     noteOff.channel = keyPress.channel;
-        //     noteOff.param1 = keyPress.pitch;
-        //     noteOff.param2 = keyPress.velocity;
-        //     // add the note off event to the note tracker;
-        //     let fireTime = ticks + keyPress.duration;
-        //     if (noteTracker[fireTime] != undefined) {
-        //         noteTracker[fireTime].push(noteOff);
-        //     } else {
-        //         noteTracker[fireTime] = [noteOff];
-        //     }
-        //     // then on to the next event...
-        // }
-        // // finish any remaining note off events
-        // let remainingTicks = Object.keys(noteTracker);
-        // remainingTicks.sort((a, b) => {
-        //     return parseInt(a) - parseInt(b);
-        // });
-        // remainingTicks.forEach(tick => {
-        //     runningDelta += parseInt(tick, 16) - ticks;
-        //     noteTracker[tick].forEach(event => {
-        //         event.delta = runningDelta;
-        //         trackEvents.push(event);
-        //         runningDelta = 0x00;
-        //     })
-        //     ticks = tick;
-        // });
-
         // finally, end the track
         let endOftrack = Object.assign({}, endOfTrackZero);
         trackEvents.push(endOftrack);
         outputMidi.setTrackEvents(trackIndex, trackEvents);
     });
+    // for (let k = 0; k < outputMidi.tracks.length; k++) {
+    //     let trackEventsLog = outputMidi.getTrackEvents(k);
+    //     console.log(`Track ${k}`);
+    //     console.log(trackEventsLog[0]);
+    //     console.log(trackEventsLog[1]);
+    //     console.log(trackEventsLog[2]);
+    //     console.log(trackEventsLog[3]);
+    //     console.log(trackEventsLog[4]);
+    //     console.log(trackEventsLog[5]);
+    // }
+
 
     return outputMidi;
 }

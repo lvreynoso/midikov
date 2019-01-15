@@ -11,7 +11,6 @@ import midiEvents from 'midievents'
 const transformMIDI = (midi) => {
 
     let trackNotes = {};
-
     for (let index = 0; index < midi.tracks.length; index++) {
         let notes = [];
         let noteTracker = {};
@@ -19,10 +18,20 @@ const transformMIDI = (midi) => {
         // keep track of delta between note on events
         let alpha = 0x000000;
         let trackEvents = midi.getTrackEvents(index);
+        // if (index < 4) {
+        //     console.log(`Track ${index}`);
+        //     console.log(trackEvents[0]);
+        //     console.log(trackEvents[1]);
+        //     console.log(trackEvents[2]);
+        //     console.log(trackEvents[3]);
+        //     console.log(trackEvents[4]);
+        //     console.log(trackEvents[5]);
+        // }
         let newTrackEvents = trackEvents.map(event => {
             // first update the delta time.
             deltaTime += event.delta;
             alpha += event.delta;
+            // console.log(alpha);
             // console.log(`Added ${event.delta} of delta time.`);
             // change of instrument events are called "midi program" events.
             // they are of event type 0x8 and subtype 0xc.

@@ -18,6 +18,7 @@ const analyze = (midi) => {
         outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
         console.log(`${midi.header.getSMPTEFrames()}, ${midi.header.getTicksPerFrame()}`);
     }
+    // console.log(`${midi.header.getSMPTEFrames()}, ${midi.header.getTicksPerFrame()}`);
 
     for (let index = 0; index < midi.tracks.length; index++) {
         outputMidi.addTrack(index);
@@ -49,12 +50,13 @@ const analyze = (midi) => {
                 //     let note = hexToNote(event.param1);
                 //     console.log(`${note} stopped ${event.delta} clocks after the preceding event.`);
                 // }
-                // console.log(event);
+                // console.log(event.delta);
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER) {
                 // synthesizer effects are applied by midi controller events. they are of type 0x8
                 // and subtype 0xb, and affect all tracks.
-                // console.log(`Synthesizer effect on Track ${index}`);
+                console.log(`Synthesizer effect on Track ${index}`);
+                console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_END_OF_TRACK) {
                 // the end of a track is signalled by an event of type 0xff and subtype 0x2f.
@@ -71,7 +73,7 @@ const analyze = (midi) => {
                 // Divide 60,000,000 / this parameter and you get the bpm of the song.
                 // TRACK 0
                 // console.log(`SET TEMPO event on Track ${index}`);
-                console.log(event);
+                // console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_MARKER) {
                 // this midi 'meta' marker event is simply a marker - it does the same function
@@ -89,7 +91,7 @@ const analyze = (midi) => {
                 // 4: number of notated 32nd notes in a MIDI quarter-note. usually 8.
                 // type: 0xff, subtype: 0x58
                 // TRACK 0
-                // console.log(`Set time signature on Track ${index}`);
+                console.log(`Set time signature on Track ${index}`);
                 console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_KEY_SIGNATURE) {
@@ -100,7 +102,7 @@ const analyze = (midi) => {
                 // type: 0xff, subtype: 0x59
                 // TRACK 0
                 // console.log(`Set key signature on Track ${index}`);
-                console.log(event);
+                // console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PITCH_BEND) {
                 // fancy pitch bending. type 0x08, subtype 0xe.
@@ -116,6 +118,7 @@ const analyze = (midi) => {
                 return event;
             } else if (event.type == midiEvents.EVENT_META) {
                 // all other meta events
+                console.log(`Other meta event on Track ${index}`);
                 console.log(event);
                 return 99;
             } else if (event.type == midiEvents.EVENT_SYSEX || event.type == midiEvents.EVENT_DIVSYSEX) {

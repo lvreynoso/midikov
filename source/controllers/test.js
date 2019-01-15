@@ -34,23 +34,8 @@ test.get('/assemble', async (req, res) => {
     const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
     let testMidi = readMIDI(testMidiDBObjects[0].data);
     let testNotes = transformMIDI(testMidi);
-    // // find the longest track
-    // let longestTrackIndex = 0;
-    // let longestLength = 0;
-    // for (let i = 0; i < testNotes.length; i++) {
-    //     if (testNotes[i].length > longestLength) {
-    //         longestTrackIndex = i;
-    //         longestLength = testNotes[i].length;
-    //     }
-    // }
-    // console.log(testNotes);
-    let assembledMidi = assembleMIDI(testNotes);
 
-    // debugging
-    // for (let i = 0; i < assembledMidi.tracks.length; i++) {
-    //     let trackEvents = assembledMidi.getTrackEvents(i);
-    //     console.log(trackEvents);
-    // }
+    let assembledMidi = assembleMIDI(testNotes);
 
     // the 'assembled' midi
     let filename = `assemble_test`;
