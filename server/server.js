@@ -19,6 +19,12 @@ var _cookieParser = _interopRequireDefault(require("cookie-parser"));
 
 var _index = _interopRequireDefault(require("./controllers/index.js"));
 
+var _admin = _interopRequireDefault(require("./controllers/admin.js"));
+
+var _generate = _interopRequireDefault(require("./controllers/generate.js"));
+
+var _test = _interopRequireDefault(require("./controllers/test.js"));
+
 var _database = _interopRequireDefault(require("./database/database.js"));
 
 var _exphbsConfig = _interopRequireDefault(require("./config/exphbs-config.js"));
@@ -31,7 +37,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const result = process.env.NODE_ENV == 'development' ? _dotenv.default.config() : false; // dependencies
 
-const exphbs = _expressHandlebars.default.create(_exphbsConfig.default); // whatevers
+const exphbs = _expressHandlebars.default.create(_exphbsConfig.default); // middleware
 
 
 // set our express options
@@ -42,6 +48,7 @@ app.use(_bodyParser.default.urlencoded({
 }));
 app.use(_bodyParser.default.json());
 app.use(_express.default.static('public'));
+_express.default.static.mime.types['wasm'] = 'application/wasm';
 app.use((0, _expressValidator.default)());
 app.use((0, _cookieParser.default)());
 app.use(_checkCookie.default); // set our view engine
@@ -49,7 +56,10 @@ app.use(_checkCookie.default); // set our view engine
 app.engine('handlebars', exphbs.engine);
 app.set('view engine', 'handlebars'); // routes
 
-app.use('/', _index.default); // face the world
+app.use('/', _index.default);
+app.use('/admin', _admin.default);
+app.use('/generate', _generate.default);
+app.use('/test', _test.default); // face the world
 
 const hotPort = app.get('port');
 const server = app.listen(hotPort, () => {

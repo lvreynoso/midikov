@@ -19,14 +19,40 @@ import transformMIDI from '../lib/transform-midi.js'
 import generateMIDI from '../lib/generate-midi.js'
 import analyzeMIDI from '../lib/analyze.js'
 import assembleMIDI from '../lib/assemble.js'
+import testpad from '../lib/testpad.js'
+import generateMap from '../lib/generate-map.js'
 
 // landing page
 test.get('/', (req, res) => {
     res.render('test');
 })
 
+test.get('/map', async (req, res) => {
+    // pull test midis from the data base
+    const testCategory = 'Pokemon';
+    const query = {
+        category: testCategory
+    };
+    const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
+    const midiObjects = testMidiDBObjects.map(dbEntry => {
+        const convertedMidi = readMIDI(dbEntry.data);
+        const deconstructedMidi = transformMIDI(convertedMidi);
+        return deconstructedMidi;
+    });
+    // test with order 1
+    generateMap(midiObjects, 1, testCategory);
+
+    res.redirect('/test');
+})
+
+test.get('/scratch', (req, res) => {
+    testpad();
+
+    res.redirect('/test');
+})
+
 test.get('/assemble', async (req, res) => {
-    // pull test midi from the data base
+    // pull test midis from the data base
     const testCategory = 'test';
     const query = {
         category: testCategory

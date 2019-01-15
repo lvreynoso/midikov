@@ -92,7 +92,7 @@ const assemble = (midiData) => {
         outputMidi.addTrack(trackIndex);
         let trackNotes = midiData.trackNotes[trackIndex];
         // gets the wrong channel for some reason
-        let trackChannel = trackNotes[0].channel;
+        let trackChannel = parseInt(trackIndex, 16);
         console.log(`Instrument Channel: ${trackChannel}`);
         // all track events
         let trackEvents = [];
@@ -125,7 +125,7 @@ const assemble = (midiData) => {
             delta: 0x00,
             type: 0x08,
             subtype: 0x09,
-            channel: 0x00,
+            channel: trackChannel,
             param1: 0x00,
             param2: 0x00
         }
@@ -133,7 +133,7 @@ const assemble = (midiData) => {
             delta: 0x00,
             type: 0x08,
             subtype: 0x08,
-            channel: 0x00,
+            channel: trackChannel,
             param1: 0x00,
             param2: 0x00
         }
@@ -143,6 +143,8 @@ const assemble = (midiData) => {
         // create all the events at the proper 'tick'
         // THEN go through the hashmap and assemble events
         // calculate deltas by the distance between ticks
+        // apparently Javascript has problems with hexadecimal math
+        // so ticks are in decimal numbers. seems to work...
         let noteTracker = {};
         let ticks = 0;
         trackNotes.forEach(note => {
@@ -155,7 +157,7 @@ const assemble = (midiData) => {
             ticks += note.alpha;
             // add the on event
             let noteOn = Object.assign({}, noteOnTemplate);
-            noteOn.channel = note.channel;
+            noteOn.channel = trackChannel;
             noteOn.param1 = note.pitch;
             noteOn.param2 = note.velocity;
             if (noteTracker[ticks] == undefined) {
@@ -165,7 +167,7 @@ const assemble = (midiData) => {
             }
             // add the off event
             let noteOff = Object.assign({}, noteOffTemplate);
-            noteOff.channel = note.channel;
+            noteOff.channel = trackChannel;
             noteOff.param1 = note.pitch;
             noteOff.param2 = note.velocity;
             let offPosition = ticks + note.duration;
