@@ -9,8 +9,6 @@ const pianize = (midi) => {
     let outputMidi = new midiFile();
     outputMidi.header.setFormat(midi.header.getFormat());
     console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
-    // outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
-    // outputMidi.header.setSMPTEDivision(midi.header.getSMPTEFrames(), midi.header.getTicksPerFrame());
     if (midi.header.getTimeDivision() === midiFile.Header.TICKS_PER_BEAT) {
         outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
     } else {
@@ -92,13 +90,12 @@ const pianize = (midi) => {
                 // fancy channel aftertouches. type 0x08, subtype 0xd.
                 return event;
             } else if (event.type == midiEvents.EVENT_META) {
-                // all other meta events
+                // drop all other meta events
                 return 99;
             } else if (event.type == midiEvents.EVENT_SYSEX || event.type == midiEvents.EVENT_DIVSYSEX) {
                 // drop all system exclusive messages
                 return 99;
             } else {
-                // TODO: drop 0xff-0x20, 0xff-0x7f
                 console.log(event);
                 return event;
             }
@@ -110,12 +107,7 @@ const pianize = (midi) => {
                 return true
             }
         })
-        console.log(`Track ${index} has ${filteredTrackEvents.length} events.`);
-        // if (index == 0 || index == 4 || index == 5) {
-        //     filteredTrackEvents.forEach(element => {
-        //         console.log(element);
-        //     })
-        // }
+        // console.log(`Track ${index} has ${filteredTrackEvents.length} events.`);
         outputMidi.setTrackEvents(index, filteredTrackEvents);
     }
     return outputMidi;

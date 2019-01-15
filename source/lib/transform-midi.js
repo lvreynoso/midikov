@@ -10,25 +10,19 @@ import midiEvents from 'midievents'
 
 const transformMIDI = (midi) => {
 
-    // let markovMap = {
-    //     notes: {
-    //         track: {
-    //
-    //         }
-    //     }
-    // }
-
-    // let notes = [];
-    let trackNotes = [];
+    let trackNotes = {};
 
     for (let index = 0; index < midi.tracks.length; index++) {
         let notes = [];
         let noteTracker = {};
-        let deltaTime = 0;
+        let deltaTime = 0x000000;
+        // keep track of delta between note on events
+        let alpha = 0x000000;
         let trackEvents = midi.getTrackEvents(index);
         let newTrackEvents = trackEvents.map(event => {
             // first update the delta time.
             deltaTime += event.delta;
+            alpha += event.delta;
             // console.log(`Added ${event.delta} of delta time.`);
             // change of instrument events are called "midi program" events.
             // they are of event type 0x8 and subtype 0xc.
@@ -57,8 +51,9 @@ const transformMIDI = (midi) => {
 
                 // put a new note in the tracker
                 if (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON) {
-                    let newNote = new Note(event, deltaTime);
+                    let newNote = new Note(event, deltaTime, alpha);
                     noteTracker[event.param1] = newNote;
+                    alpha = 0x000000;
                 }
 
                 return event;
@@ -102,21 +97,30 @@ const transformMIDI = (midi) => {
         // let leftovers = Object.keys(noteTracker);
         // console.log(`Note tracker has ${leftovers.length} leftovers.`)
         // console.log(notes);
-        trackNotes.push(notes);
+        trackNotes[index] = notes;
     }
     // console.log(trackNotes);
+    // trim empty tracks
+    let tracks = Object.keys(trackNotes);
+    tracks.forEach(track => {
+        if (trackNotes[track].length == 0) {
+            delete trackNotes[track];
+            // console.log(`Deleted track ${track}`);
+        }
+    });
+
     return trackNotes;
 }
 
 class Note {
-    constructor(event, time) {
+    constructor(event, time, alpha) {
         this.pitch = event.param1;
         this.velocity = event.param2;
-        this.delta = event.delta;
+        this.alpha = alpha;
         this.channel = event.channel;
         this.startIndex = time;
-        this.endIndex = 0x00;
-        this.duration = 0x00;
+        this.endIndex = 0x000000;
+        this.duration = 0x000000;
     }
 
     off(time) {
