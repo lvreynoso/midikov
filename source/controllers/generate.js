@@ -17,6 +17,7 @@ import readMIDI from '../lib/read-midi.js'
 import writeMIDI from '../lib/write-midi.js'
 import transformMIDI from '../lib/transform-midi.js'
 import generateMIDI from '../lib/generate-midi.js'
+import assembleMIDI from '../lib/assemble.js'
 
 generate.post('/', async (req, res) => {
     // pull the midi from the database
@@ -24,26 +25,35 @@ generate.post('/', async (req, res) => {
     const query = {
         category: category
     }
-    const sampleMIDI = await MIDIFile.findOne(query).catch(err => { console.log(err) });
-    const sampleHex = sampleMIDI.data.toString('hex');
+    // get all midis from a category
+    const categoryMidis = await MIDIFile.find(query).catch(err => { console.log(err) });
+
+    // fake it until you make it...
+    const randomMidi = categoryMidis[Math.floor(Math.random() * categoryMidis.length)]
+    const sacrificedMidi = readMIDI(randomMidi.data);
+    const transformMIDIdata = transformMIDI(sacrificedMidi);
+    const frankenSong = assembleMIDI(transformMIDIdata);
+    const frankenSongBinary = Buffer.from(frankenSong.getContent());
+
+    const generatedHex = frankenSongBinary.toString('hex');
 
     // write it to a file
     let path = 'public/temp/test.midi';
     let writeStream = fs.createWriteStream(path);
-    writeStream.write(sampleHex, 'hex');
+    writeStream.write(generatedHex, 'hex');
     writeStream.on('finish', () => {
         console.log('Wrote data to file.');
     })
     writeStream.close();
 
     // send the data
-    const sampleObject = {
-        title: sampleMIDI.title,
-        hex: sampleHex,
+    const generatedObject = {
+        title: randomMidi.title,
+        hex: generatedHex,
         path: '/temp/test.midi'
     }
-    const sampleJSON = JSON.stringify(sampleObject);
-    res.status(200).send(sampleJSON);
+    const generatedJSON = JSON.stringify(generatedObject);
+    res.status(200).send(generatedJSON);
 });
 
 // test Markov generation

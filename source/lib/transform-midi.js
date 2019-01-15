@@ -123,7 +123,7 @@ const transformMIDI = (midi) => {
                 }
                 return event;
             } else {
-                console.log(event);
+                // console.log(event);
                 return event;
             }
         });
