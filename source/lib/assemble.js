@@ -12,7 +12,7 @@ import midiEvents from 'midievents'
 
 const assemble = (midiData) => {
     // debugging
-    console.log(midiData.metaData);
+    // console.log(midiData.metaData);
 
 
     let outputMidi = new midiFile();
@@ -82,18 +82,18 @@ const assemble = (midiData) => {
     // first figure out how many tracks are in the input object
     // then loop through and write the tracks
     let trackNumbers = Object.keys(midiData.trackNotes);
-    console.log(`Tracks to write: ${trackNumbers}`);
+    // console.log(`Tracks to write: ${trackNumbers}`);
     trackNumbers.sort((a, b) => {
         return parseInt(a, 10) - parseInt(b, 10);
     });
 
     trackNumbers.forEach(trackIndex => {
-        console.log(`Writing track ${trackIndex}`);
+        // console.log(`Writing track ${trackIndex}`);
         outputMidi.addTrack(trackIndex);
         let trackNotes = midiData.trackNotes[trackIndex];
         // gets the wrong channel for some reason
         let trackChannel = parseInt(trackIndex, 16);
-        console.log(`Instrument Channel: ${trackChannel}`);
+        // console.log(`Instrument Channel: ${trackChannel}`);
         // all track events
         let trackEvents = [];
         // Key signature
@@ -202,16 +202,6 @@ const assemble = (midiData) => {
         trackEvents.push(endOftrack);
         outputMidi.setTrackEvents(trackIndex, trackEvents);
     });
-    // for (let k = 0; k < outputMidi.tracks.length; k++) {
-    //     let trackEventsLog = outputMidi.getTrackEvents(k);
-    //     console.log(`Track ${k}`);
-    //     console.log(trackEventsLog[0]);
-    //     console.log(trackEventsLog[1]);
-    //     console.log(trackEventsLog[2]);
-    //     console.log(trackEventsLog[3]);
-    //     console.log(trackEventsLog[4]);
-    //     console.log(trackEventsLog[5]);
-    // }
 
 
     return outputMidi;

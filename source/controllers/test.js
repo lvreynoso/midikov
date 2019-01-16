@@ -110,7 +110,7 @@ test.get('/transform', async (req, res) => {
     let testMidi = readMIDI(testMidiDBObjects[0].data);
     let testNotes = transformMIDI(testMidi);
     testNotes.forEach(notes => {
-        console.log(notes.length);
+        // console.log(notes.length);
     })
     // console.log(testNotes);
 

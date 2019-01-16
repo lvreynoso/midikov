@@ -77,7 +77,7 @@ const generate = (markovData, order, category) => {
     if (Object.getOwnPropertyNames(markovData.meta['timeSignature']).length > 0) {
         codedTimeSignature = weightedChoice(markovData.meta['timeSignature']);
     }
-    console.log(codedTimeSignature);
+    // console.log(codedTimeSignature);
     let timeSignature = {
         delta: 0x00,
         type: 0xff,
@@ -105,7 +105,7 @@ const generate = (markovData, order, category) => {
     if (Object.getOwnPropertyNames(markovData.meta['tempo']).length > 0) {
         codedTempo = weightedChoice(markovData.meta['tempo']);
     }
-    console.log(codedTempo);
+    // console.log(codedTempo);
     let tempo = {
         delta: 0x00,
         type: 0xff,
@@ -116,7 +116,7 @@ const generate = (markovData, order, category) => {
     tempo.tempo = parseInt(codedTempo, 10);
     metaData.tempo = tempo;
 
-    console.log(metaData);
+    // console.log(metaData);
     // that finishes the metadata
 
 
@@ -157,10 +157,10 @@ function generateTrack(noteMap, markovOrder, distance) {
             startingPossibilities.push(markovKey);
         }
     });
-    console.log(startingPossibilities);
+    // console.log(startingPossibilities);
     let state = startingPossibilities[Math.floor(Math.random() * startingPossibilities.length)];
     state = state.split('|')
-    console.log(state);
+    // console.log(state);
     state.forEach(token => {
         stateQueue.enqueue(token);
     });
@@ -217,7 +217,7 @@ function generateTrack(noteMap, markovOrder, distance) {
 
         // debugging
         if (trackNotes.length == 1) {
-            console.log(trackNotes);
+            // console.log(trackNotes);
         }
     }
     return trackNotes;

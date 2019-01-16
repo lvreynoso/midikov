@@ -8,7 +8,7 @@ const pianize = (midi) => {
     // copy the midi data
     let outputMidi = new midiFile();
     outputMidi.header.setFormat(midi.header.getFormat());
-    console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
+    // console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
     if (midi.header.getTimeDivision() === midiFile.Header.TICKS_PER_BEAT) {
         outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
     } else {
@@ -33,9 +33,9 @@ const pianize = (midi) => {
                 if (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON) {
                     let indexHex = parseInt(event.index, 16);
                     let indexString = indexHex.toString(10)
-                    console.log(`Event at time ${indexString}`);
+                    // console.log(`Event at time ${indexString}`);
                     let note = hexToNote(event.param1);
-                    console.log(`${note} played ${event.delta} clocks after the preceding event.`);
+                    // console.log(`${note} played ${event.delta} clocks after the preceding event.`);
                 }
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER) {
