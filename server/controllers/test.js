@@ -122,8 +122,7 @@ test.get('/transform', async (req, res) => {
   });
   let testMidi = (0, _readMidi.default)(testMidiDBObjects[0].data);
   let testNotes = (0, _transformMidi.default)(testMidi);
-  testNotes.forEach(notes => {
-    console.log(notes.length);
+  testNotes.forEach(notes => {// console.log(notes.length);
   }); // console.log(testNotes);
 
   res.redirect('/test');

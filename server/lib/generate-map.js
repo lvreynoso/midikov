@@ -84,9 +84,9 @@ const generateMap = (midiArray, order, category) => {
     }
 
     state = newState;
-  }
+  } // console.log(markovMap);
+  // write map to disk
 
-  console.log(markovMap); // write map to disk
 
   let stringMap = JSON.stringify(markovMap);
   let filename = `${category}_${order}.markov`;

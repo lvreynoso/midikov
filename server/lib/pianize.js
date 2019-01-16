@@ -19,8 +19,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const pianize = midi => {
   // copy the midi data
   let outputMidi = new _midifile.default();
-  outputMidi.header.setFormat(midi.header.getFormat());
-  console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
+  outputMidi.header.setFormat(midi.header.getFormat()); // console.log(`MIDI File Format Type: ${midi.header.getFormat()}`);
 
   if (midi.header.getTimeDivision() === _midifile.default.Header.TICKS_PER_BEAT) {
     outputMidi.header.setTicksPerBeat(midi.header.getTicksPerBeat());
@@ -45,10 +44,9 @@ const pianize = midi => {
         // they are of event type 0x8 and subtypes 0x9 for 'note on' and 0x8 for 'note off'.
         if (event.subtype == _midievents.default.EVENT_MIDI_NOTE_ON) {
           let indexHex = parseInt(event.index, 16);
-          let indexString = indexHex.toString(10);
-          console.log(`Event at time ${indexString}`);
-          let note = (0, _noteMap.default)(event.param1);
-          console.log(`${note} played ${event.delta} clocks after the preceding event.`);
+          let indexString = indexHex.toString(10); // console.log(`Event at time ${indexString}`);
+
+          let note = (0, _noteMap.default)(event.param1); // console.log(`${note} played ${event.delta} clocks after the preceding event.`);
         }
 
         return event;
