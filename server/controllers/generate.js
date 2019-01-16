@@ -29,6 +29,8 @@ var _generateMidi = _interopRequireDefault(require("../lib/generate-midi.js"));
 
 var _assemble = _interopRequireDefault(require("../lib/assemble.js"));
 
+var _generateMap = _interopRequireDefault(require("../lib/generate-map.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // generate.js
@@ -40,18 +42,29 @@ generate.post('/', async (req, res) => {
   // pull the midi from the database
   const category = req.body.category;
   const query = {
-    category: category // get all midis from a category
-
+    category: category
   };
-  const categoryMidis = await _MIDIFile.default.find(query).catch(err => {
+  const testMidiDBObjects = await _MIDIFile.default.find(query).catch(err => {
     console.log(err);
-  }); // fake it until you make it...
+  });
+  const midiObjects = testMidiDBObjects.map(dbEntry => {
+    const convertedMidi = (0, _readMidi.default)(dbEntry.data);
+    const deconstructedMidi = (0, _transformMidi.default)(convertedMidi);
+    return deconstructedMidi;
+  }); // test with order 1
 
-  const randomMidi = categoryMidis[Math.floor(Math.random() * categoryMidis.length)];
-  const sacrificedMidi = (0, _readMidi.default)(randomMidi.data);
-  const transformMIDIdata = (0, _transformMidi.default)(sacrificedMidi);
-  const frankenSong = (0, _assemble.default)(transformMIDIdata);
-  const frankenSongBinary = Buffer.from(frankenSong.getContent());
+  let markovData = (0, _generateMap.default)(midiObjects, 1, category);
+  let generatedSong = (0, _generateMidi.default)(markovData, 1, category);
+  let generatedMidi = (0, _assemble.default)(generatedSong); // get all midis from a category
+  // const categoryMidis = await MIDIFile.find(query).catch(err => { console.log(err) });
+  // fake it until you make it...
+  // const randomMidi = categoryMidis[Math.floor(Math.random() * categoryMidis.length)]
+  // const sacrificedMidi = readMIDI(randomMidi.data);
+  // const transformMIDIdata = transformMIDI(sacrificedMidi);
+  // const frankenSong = assembleMIDI(transformMIDIdata);
+
+  const frankenSongBinary = Buffer.from(generatedMidi.getContent()); //
+
   const generatedHex = frankenSongBinary.toString('hex'); // write it to a file
 
   let path = 'public/temp/test.midi';
@@ -62,10 +75,11 @@ generate.post('/', async (req, res) => {
   writeStream.on('finish', () => {
     console.log('Wrote data to file.');
   });
-  writeStream.close(); // send the data
+  writeStream.close();
+  let randomInt = Math.floor(Math.random() * 100); // send the data
 
   const generatedObject = {
-    title: randomMidi.title,
+    title: `${category} - Generated id${randomInt}`,
     hex: generatedHex,
     path: '/temp/test.midi'
   };

@@ -14,8 +14,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // that we can manipulate
 const readMIDI = binaryData => {
   let decodedFile = new _midifile.default(binaryData); // console.log(decodedFile);
+  // console.log(`Track count: ${decodedFile.header.getTracksCount()}`);
 
-  console.log(`Track count: ${decodedFile.header.getTracksCount()}`);
   let events = decodedFile.getMidiEvents(); // console.log(events[0]);
 
   return decodedFile;

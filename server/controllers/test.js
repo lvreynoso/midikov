@@ -29,6 +29,10 @@ var _analyze = _interopRequireDefault(require("../lib/analyze.js"));
 
 var _assemble = _interopRequireDefault(require("../lib/assemble.js"));
 
+var _testpad = _interopRequireDefault(require("../lib/testpad.js"));
+
+var _generateMap = _interopRequireDefault(require("../lib/generate-map.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // test.js
@@ -40,8 +44,54 @@ const test = _express.default.Router(); // disk i/o
 test.get('/', (req, res) => {
   res.render('test');
 });
+test.get('/generate', async (req, res) => {
+  // pull test midis from the data base
+  const testCategory = 'Pokemon';
+  const query = {
+    category: testCategory
+  };
+  const testMidiDBObjects = await _MIDIFile.default.find(query).catch(err => {
+    console.log(err);
+  });
+  const midiObjects = testMidiDBObjects.map(dbEntry => {
+    const convertedMidi = (0, _readMidi.default)(dbEntry.data);
+    const deconstructedMidi = (0, _transformMidi.default)(convertedMidi);
+    return deconstructedMidi;
+  }); // test with order 1
+
+  let markovData = (0, _generateMap.default)(midiObjects, 1, testCategory);
+  let generatedSong = (0, _generateMidi.default)(markovData, 1, testCategory);
+  let generatedMidi = (0, _assemble.default)(generatedSong); // the 'assembled' midi
+
+  let filename = `generate_test`;
+  let binaryMidiData = Buffer.from(generatedMidi.getContent());
+  (0, _writeMidi.default)(binaryMidiData, filename);
+  res.redirect('/test');
+});
+test.get('/map', async (req, res) => {
+  // pull test midis from the data base
+  const testCategory = 'Pokemon';
+  const query = {
+    category: testCategory
+  };
+  const testMidiDBObjects = await _MIDIFile.default.find(query).catch(err => {
+    console.log(err);
+  });
+  const midiObjects = testMidiDBObjects.map(dbEntry => {
+    const convertedMidi = (0, _readMidi.default)(dbEntry.data);
+    const deconstructedMidi = (0, _transformMidi.default)(convertedMidi);
+    return deconstructedMidi;
+  }); // test with order 1
+
+  (0, _generateMap.default)(midiObjects, 1, testCategory);
+  res.redirect('/test');
+});
+test.get('/scratch', (req, res) => {
+  (0, _testpad.default)();
+  res.redirect('/test');
+});
 test.get('/assemble', async (req, res) => {
-  // pull test midi from the data base
+  // pull test midis from the data base
   const testCategory = 'test';
   const query = {
     category: testCategory
