@@ -41,7 +41,13 @@ test.get('/generate', async (req, res) => {
     });
     // test with order 1
     let markovData = generateMap(midiObjects, 1, testCategory);
-    generateMIDI(markovData);
+    let generatedSong = generateMIDI(markovData, 1, testCategory);
+    let generatedMidi = assembleMIDI(generatedSong);
+
+    // the 'assembled' midi
+    let filename = `generate_test`;
+    let binaryMidiData = Buffer.from(generatedMidi.getContent());
+    writeMIDI(binaryMidiData, filename);
 
     res.redirect('/test');
 })

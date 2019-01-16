@@ -55,6 +55,7 @@ const generateMap = (midiArray, order, category) => {
         stateTracker.enqueue(item);
     });
     let state = stateTracker.items();
+    // console.log(state);
     markovMap[state] = {};
 
     // this is a very big loop.
@@ -76,6 +77,7 @@ const generateMap = (midiArray, order, category) => {
         }
         state = newState;
     }
+    console.log(markovMap);
 
     // write map to disk
     let stringMap = JSON.stringify(markovMap);
