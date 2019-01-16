@@ -62,20 +62,20 @@ generate.post('/', async (req, res) => {
   // const sacrificedMidi = readMIDI(randomMidi.data);
   // const transformMIDIdata = transformMIDI(sacrificedMidi);
   // const frankenSong = assembleMIDI(transformMIDIdata);
+  // const frankenSongBinary = Buffer.from(frankenSong.getContent());
+  //
+  // const generatedHex = frankenSongBinary.toString('hex');
 
-  const frankenSongBinary = Buffer.from(generatedMidi.getContent()); //
+  const generatedBinary = Buffer.from(generatedMidi.getContent());
+  const generatedHex = generatedBinary.toString('hex'); // write it to a file
+  // let path = 'public/temp/test.midi';
+  // let writeStream = fs.createWriteStream(path);
+  // writeStream.write(generatedHex, 'hex');
+  // writeStream.on('finish', () => {
+  //     console.log('Wrote data to file.');
+  // })
+  // writeStream.close();
 
-  const generatedHex = frankenSongBinary.toString('hex'); // write it to a file
-
-  let path = 'public/temp/test.midi';
-
-  let writeStream = _fs.default.createWriteStream(path);
-
-  writeStream.write(generatedHex, 'hex');
-  writeStream.on('finish', () => {
-    console.log('Wrote data to file.');
-  });
-  writeStream.close();
   let randomInt = Math.floor(Math.random() * 100); // send the data
 
   const generatedObject = {
