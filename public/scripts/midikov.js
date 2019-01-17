@@ -38,19 +38,20 @@ async function generateMIDI(event) {
     if (category == 'Music Source' || order == 'Markov Order') {
         return;
     }
+    let titlebar = document.getElementById('songTitle')
+    titlebar.textContent = 'Creating song...'
     const midiResponse = await axios.post('/generate', { category: category, order: order });
-    console.log(midiResponse);
+    // console.log(midiResponse);
     const midiBuffer = hexToBuffer(midiResponse.data.hex)
-    console.log(midiBuffer);
+    // console.log(midiBuffer);
     player.load(midiBuffer);
     // player.load(midiResponse.data.path);
     // update the song title bar
-    let titlebar = document.getElementById('songTitle')
-    console.log(titlebar);
+    // console.log(titlebar);
     titlebar.textContent = midiResponse.data.title;
     // update the download button path
     downloadPath = midiResponse.data.path;
-    console.log(downloadPath);
+    // console.log(downloadPath);
 }
 
 function downloadButton(event) {
