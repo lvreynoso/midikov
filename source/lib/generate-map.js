@@ -88,15 +88,15 @@ const generateMap = (midiArray, order, category) => {
     // console.log(markovMap);
 
     // write map to disk
-    let stringMap = JSON.stringify(markovMap);
-    let filename = `${category}_${order}.markov`
-    let path = `temp/${filename}`;
-    let writeStream = fs.createWriteStream(path);
-    writeStream.write(stringMap, 'utf8');
-    writeStream.on('finish', () => {
-        console.log('Wrote data to file.');
-    })
-    writeStream.close();
+    // let stringMap = JSON.stringify(markovMap);
+    // let filename = `${category}_${order}.markov`
+    // let path = `temp/${filename}`;
+    // let writeStream = fs.createWriteStream(path);
+    // writeStream.write(stringMap, 'utf8');
+    // writeStream.on('finish', () => {
+    //     console.log('Wrote data to file.');
+    // })
+    // writeStream.close();
 
     // did it work?
     // yes it did. wow.

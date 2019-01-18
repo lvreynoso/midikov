@@ -36,13 +36,12 @@ generate.post('/', async (req, res) => {
         return deconstructedMidi;
     });
     let failed = false;
-    let errorMessage = '';
     let generatedHex = '';
     try {
         // console.log(midiObjects);
-        let markovData = generateMap(midiObjects, order, category);
-        let generatedSong = generateMIDI(markovData, order, category);
-        let generatedMidi = assembleMIDI(generatedSong);
+        const markovData = generateMap(midiObjects, order, category);
+        const generatedSong = generateMIDI(markovData, order, category);
+        const generatedMidi = assembleMIDI(generatedSong);
 
         const generatedBinary = Buffer.from(generatedMidi.getContent());
         generatedHex = generatedBinary.toString('hex');
