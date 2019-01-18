@@ -157,18 +157,16 @@ const generateMap = (midiArray, order, category) => {
       }
     });
   }); // write metadata to disk
-
-  let metaStringMap = JSON.stringify(markovMetaData);
-  let metaFilename = `${category}_${order}.meta`;
-  let metaPath = `temp/${metaFilename}`;
-
-  let metaWriteStream = _fs.default.createWriteStream(metaPath);
-
-  metaWriteStream.write(metaStringMap, 'utf8');
-  metaWriteStream.on('finish', () => {
-    console.log('Wrote data to file.');
-  });
-  metaWriteStream.close(); // did it work?
+  // let metaStringMap = JSON.stringify(markovMetaData);
+  // let metaFilename = `${category}_${order}.meta`
+  // let metaPath = `temp/${metaFilename}`;
+  // let metaWriteStream = fs.createWriteStream(metaPath);
+  // metaWriteStream.write(metaStringMap, 'utf8');
+  // metaWriteStream.on('finish', () => {
+  //     console.log('Wrote data to file.');
+  // })
+  // metaWriteStream.close();
+  // did it work?
   // yes!
 
   let markovData = {
