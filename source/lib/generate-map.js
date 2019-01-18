@@ -45,16 +45,24 @@ const generateMap = (midiArray, order, category) => {
     // it's better in the original python.
     let markovMap = {};
     let startingItems = [];
-
+    console.log(`Order: ${order}`);
     for (let n = 0; n < order; n++) {
         startingItems.push(tokenArray[n]);
     }
-
+    console.log(`Starting items: ${startingItems}`);
     let stateTracker = new Queue(order);
     startingItems.forEach(item => {
         stateTracker.enqueue(item);
     });
-    let state = stateTracker.items();
+    // let trackerItems = stateTracker.items();
+
+    // since javascript does not have tuples and arrays cannot be used
+    // as keys in an object, we need to transform the state into a string
+    // where tokens are separated by a pipe '|'
+    console.log(stateTracker.items());
+    let state = stringify(stateTracker.items());
+
+
     // console.log(state);
     markovMap[state] = {};
 
@@ -62,7 +70,7 @@ const generateMap = (midiArray, order, category) => {
     for (let index = order; index < tokenArray.length; index++) {
         let newToken = tokenArray[index];
         stateTracker.enqueue(newToken);
-        let newState = stateTracker.items();
+        let newState = stringify(stateTracker.items());
 
         // add the new state to the markov map
         if (markovMap[newState] == undefined) {
@@ -80,15 +88,15 @@ const generateMap = (midiArray, order, category) => {
     // console.log(markovMap);
 
     // write map to disk
-    // let stringMap = JSON.stringify(markovMap);
-    // let filename = `${category}_${order}.markov`
-    // let path = `temp/${filename}`;
-    // let writeStream = fs.createWriteStream(path);
-    // writeStream.write(stringMap, 'utf8');
-    // writeStream.on('finish', () => {
-    //     console.log('Wrote data to file.');
-    // })
-    // writeStream.close();
+    let stringMap = JSON.stringify(markovMap);
+    let filename = `${category}_${order}.markov`
+    let path = `temp/${filename}`;
+    let writeStream = fs.createWriteStream(path);
+    writeStream.write(stringMap, 'utf8');
+    writeStream.on('finish', () => {
+        console.log('Wrote data to file.');
+    })
+    writeStream.close();
 
     // did it work?
     // yes it did. wow.
@@ -143,15 +151,15 @@ const generateMap = (midiArray, order, category) => {
     });
 
     // write metadata to disk
-    // let metaStringMap = JSON.stringify(markovMetaData);
-    // let metaFilename = `${category}_${order}.meta`
-    // let metaPath = `temp/${metaFilename}`;
-    // let metaWriteStream = fs.createWriteStream(metaPath);
-    // metaWriteStream.write(metaStringMap, 'utf8');
-    // metaWriteStream.on('finish', () => {
-    //     console.log('Wrote data to file.');
-    // })
-    // metaWriteStream.close();
+    let metaStringMap = JSON.stringify(markovMetaData);
+    let metaFilename = `${category}_${order}.meta`
+    let metaPath = `temp/${metaFilename}`;
+    let metaWriteStream = fs.createWriteStream(metaPath);
+    metaWriteStream.write(metaStringMap, 'utf8');
+    metaWriteStream.on('finish', () => {
+        console.log('Wrote data to file.');
+    })
+    metaWriteStream.close();
 
     // did it work?
     // yes!
@@ -167,6 +175,18 @@ const generateMap = (midiArray, order, category) => {
 function tokenize(note) {
     let token = `${note.pitch}-${note.velocity}-${note.alpha}-${note.duration}`
     return token;
+}
+
+function stringify(tokens) {
+    let outputString = '';
+    tokens.forEach((element, i) => {
+        if (i == 0) {
+            outputString += `${element}`;
+        } else {
+            outputString += `|${element}`;
+        }
+    });
+    return outputString;
 }
 
 export default generateMap;

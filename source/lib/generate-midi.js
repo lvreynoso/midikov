@@ -152,15 +152,17 @@ function generateTrack(noteMap, markovOrder, distance) {
     let markovKeys = Object.keys(noteMap);
     let startingPossibilities = [];
     markovKeys.forEach(markovKey => {
+        // console.log(markovKey);
         let decodedKey = markovKey.split('|');
         if (decodedKey[0] == START_TOKEN) {
             startingPossibilities.push(markovKey);
         }
     });
-    // console.log(startingPossibilities);
+    // console.log(`Starting possibilities: ${startingPossibilities}`);
     let state = startingPossibilities[Math.floor(Math.random() * startingPossibilities.length)];
     state = state.split('|')
-    // console.log(state);
+    console.log(`First state:`);
+    console.log(state);
     state.forEach(token => {
         stateQueue.enqueue(token);
     });
@@ -190,14 +192,16 @@ function generateTrack(noteMap, markovOrder, distance) {
         }
         // start tokens aren't written
         if (currentNote == START_TOKEN) {
-            let setOfPossibilities = noteMap[state];
+            let stateToken = state.join('|')
+            let setOfPossibilities = noteMap[stateToken];
             let nextNote = weightedChoice(setOfPossibilities);
             stateQueue.enqueue(nextNote);
             state = stateQueue.items();
             currentNote = stateQueue.dequeue();
         }
         // enqueue our next token
-        let setOfPossibilities = noteMap[state];
+        let stateToken = state.join('|')
+        let setOfPossibilities = noteMap[stateToken];
         let nextNote = weightedChoice(setOfPossibilities);
         stateQueue.enqueue(nextNote);
 

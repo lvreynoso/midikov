@@ -40,18 +40,18 @@ async function generateMIDI(event) {
     }
     let titlebar = document.getElementById('songTitle')
     titlebar.textContent = 'Creating song...'
-    const midiResponse = await axios.post('/generate', { category: category, order: order });
-    // console.log(midiResponse);
-    const midiBuffer = hexToBuffer(midiResponse.data.hex)
-    // console.log(midiBuffer);
-    player.load(midiBuffer);
-    // player.load(midiResponse.data.path);
-    // update the song title bar
-    // console.log(titlebar);
-    titlebar.textContent = midiResponse.data.title;
-    // update the download button path
-    downloadPath = midiResponse.data.path;
-    // console.log(downloadPath);
+    try {
+        const midiResponse = await axios.post('/generate', { category: category, order: order });
+        const midiBuffer = hexToBuffer(midiResponse.data.hex)
+        player.load(midiBuffer);
+        // update the song title bar
+        titlebar.textContent = midiResponse.data.title;
+        // update the download button path
+        downloadPath = midiResponse.data.path;
+    } catch (error) {
+        console.log(error);
+        titlebar.textContent = `${error}`
+    }
 }
 
 function downloadButton(event) {
