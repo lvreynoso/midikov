@@ -5,9 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-require("core-js/modules/web.dom.iterable");
-
 require("core-js/modules/es6.regexp.to-string");
+
+require("core-js/modules/es6.regexp.split");
 
 var _express = _interopRequireDefault(require("express"));
 
@@ -41,93 +41,53 @@ const generate = _express.default.Router(); // disk i/o
 generate.post('/', async (req, res) => {
   // pull the midi from the database
   const category = req.body.category;
+  const order = parseInt(req.body.order.split(' ')[1], 10);
+  console.log(order);
   const query = {
     category: category
   };
-  const testMidiDBObjects = await _MIDIFile.default.find(query).catch(err => {
+  const categoryMidiDBObjects = await _MIDIFile.default.find(query).catch(err => {
     console.log(err);
   });
-  const midiObjects = testMidiDBObjects.map(dbEntry => {
+  const midiObjects = categoryMidiDBObjects.map(dbEntry => {
     const convertedMidi = (0, _readMidi.default)(dbEntry.data);
     const deconstructedMidi = (0, _transformMidi.default)(convertedMidi);
     return deconstructedMidi;
-  }); // test with order 1
-
-  let markovData = (0, _generateMap.default)(midiObjects, 1, category);
-  let generatedSong = (0, _generateMidi.default)(markovData, 1, category);
-  let generatedMidi = (0, _assemble.default)(generatedSong); // get all midis from a category
-  // const categoryMidis = await MIDIFile.find(query).catch(err => { console.log(err) });
-  // fake it until you make it...
-  // const randomMidi = categoryMidis[Math.floor(Math.random() * categoryMidis.length)]
-  // const sacrificedMidi = readMIDI(randomMidi.data);
-  // const transformMIDIdata = transformMIDI(sacrificedMidi);
-  // const frankenSong = assembleMIDI(transformMIDIdata);
-  // const frankenSongBinary = Buffer.from(frankenSong.getContent());
-  //
-  // const generatedHex = frankenSongBinary.toString('hex');
-
-  const generatedBinary = Buffer.from(generatedMidi.getContent());
-  const generatedHex = generatedBinary.toString('hex'); // write it to a file
-  // let path = 'public/temp/test.midi';
-  // let writeStream = fs.createWriteStream(path);
-  // writeStream.write(generatedHex, 'hex');
-  // writeStream.on('finish', () => {
-  //     console.log('Wrote data to file.');
-  // })
-  // writeStream.close();
-
-  let randomInt = Math.floor(Math.random() * 100); // send the data
-
-  const generatedObject = {
-    title: `${category} - Generated id${randomInt}`,
-    hex: generatedHex,
-    path: '/temp/test.midi'
-  };
-  const generatedJSON = JSON.stringify(generatedObject);
-  res.status(200).send(generatedJSON);
-}); // test Markov generation
-
-generate.get('/test', async (req, res) => {
-  // pull test midi from the data base
-  const testCategory = 'test';
-  const query = {
-    category: testCategory
-  };
-  const testMidiDBObjects = await _MIDIFile.default.find(query).catch(err => {
-    console.log(err);
   });
-  let markovSources = testMidiDBObjects.map(midi => {
-    let midiJSON = (0, _readMidi.default)(midi.data);
-    return midiJSON;
-  });
-  let generatedMidi = (0, _generateMidi.default)(markovSources);
-  let generatedMidiBinary = Buffer.from(generatedMidi.getContent());
-  (0, _writeMidi.default)(generatedMidiBinary, 'test_generate');
-  res.render('test');
-}); // testing:
-// --> read midi from database
-// --> write midi to file
+  let failed = false;
+  let generatedHex = '';
 
-generate.get('/write-test', async (req, res) => {
-  // pull test midi from the data base
-  const testCategory = 'test';
-  const query = {
-    category: testCategory
-  };
-  const testMidiDBObjects = await _MIDIFile.default.find(query).catch(err => {
-    console.log(err);
-  });
-  let name = '_pianized_';
-  let counter = 1;
-  testMidiDBObjects.forEach(midi => {
-    let filename = `${counter}${name}${midi.title}`;
-    (0, _writeMidi.default)(midi.data, filename);
-    counter += 1;
-  }); // let testMidi = readMIDI(testMidiDBObjects[0].data);
-  // let transformedMIDI = transformMIDI(testMidi);
-  // writeMIDI(testMIDI);
-
-  res.render('test');
+  try {
+    // console.log(midiObjects);
+    const markovData = (0, _generateMap.default)(midiObjects, order, category);
+    const generatedSong = (0, _generateMidi.default)(markovData, order, category);
+    const generatedMidi = (0, _assemble.default)(generatedSong);
+    const generatedBinary = Buffer.from(generatedMidi.getContent());
+    generatedHex = generatedBinary.toString('hex'); // write it to a file
+    // let path = 'public/temp/test.midi';
+    // let writeStream = fs.createWriteStream(path);
+    // writeStream.write(generatedHex, 'hex');
+    // writeStream.on('finish', () => {
+    //     console.log('Wrote data to file.');
+    // })
+    // writeStream.close();
+  } catch (error) {
+    console.log(error);
+    failed = true;
+  } finally {
+    if (failed) {
+      res.status(500);
+    } else {
+      // send the data
+      const generatedObject = {
+        title: `${category} - Generated Order ${order}`,
+        hex: generatedHex,
+        path: '/temp/test.midi'
+      };
+      const generatedJSON = JSON.stringify(generatedObject);
+      res.status(200).send(generatedJSON);
+    }
+  }
 });
 var _default = generate;
 exports.default = _default;

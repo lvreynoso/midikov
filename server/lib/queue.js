@@ -34,12 +34,10 @@ class Queue {
   }
 
   items() {
-    let allItemsArray = [];
-
-    for (let i = 0; i < this.data.length; i++) {
-      allItemsArray.push(this.data[i]);
-    }
-
+    let allItemsArray = this.data.map(element => {
+      return element;
+    });
+    allItemsArray.reverse();
     return allItemsArray;
   }
 

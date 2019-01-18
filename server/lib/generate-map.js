@@ -54,23 +54,30 @@ const generateMap = (midiArray, order, category) => {
 
   let markovMap = {};
   let startingItems = [];
+  console.log(`Order: ${order}`);
 
   for (let n = 0; n < order; n++) {
     startingItems.push(tokenArray[n]);
   }
 
+  console.log(`Starting items: ${startingItems}`);
   let stateTracker = new _queue.default(order);
   startingItems.forEach(item => {
     stateTracker.enqueue(item);
-  });
-  let state = stateTracker.items(); // console.log(state);
+  }); // let trackerItems = stateTracker.items();
+  // since javascript does not have tuples and arrays cannot be used
+  // as keys in an object, we need to transform the state into a string
+  // where tokens are separated by a pipe '|'
+
+  console.log(stateTracker.items());
+  let state = stringify(stateTracker.items()); // console.log(state);
 
   markovMap[state] = {}; // this is a very big loop.
 
   for (let index = order; index < tokenArray.length; index++) {
     let newToken = tokenArray[index];
     stateTracker.enqueue(newToken);
-    let newState = stateTracker.items(); // add the new state to the markov map
+    let newState = stringify(stateTracker.items()); // add the new state to the markov map
 
     if (markovMap[newState] == undefined) {
       markovMap[newState] = {};
@@ -150,16 +157,18 @@ const generateMap = (midiArray, order, category) => {
       }
     });
   }); // write metadata to disk
-  // let metaStringMap = JSON.stringify(markovMetaData);
-  // let metaFilename = `${category}_${order}.meta`
-  // let metaPath = `temp/${metaFilename}`;
-  // let metaWriteStream = fs.createWriteStream(metaPath);
-  // metaWriteStream.write(metaStringMap, 'utf8');
-  // metaWriteStream.on('finish', () => {
-  //     console.log('Wrote data to file.');
-  // })
-  // metaWriteStream.close();
-  // did it work?
+
+  let metaStringMap = JSON.stringify(markovMetaData);
+  let metaFilename = `${category}_${order}.meta`;
+  let metaPath = `temp/${metaFilename}`;
+
+  let metaWriteStream = _fs.default.createWriteStream(metaPath);
+
+  metaWriteStream.write(metaStringMap, 'utf8');
+  metaWriteStream.on('finish', () => {
+    console.log('Wrote data to file.');
+  });
+  metaWriteStream.close(); // did it work?
   // yes!
 
   let markovData = {
@@ -172,6 +181,18 @@ const generateMap = (midiArray, order, category) => {
 function tokenize(note) {
   let token = `${note.pitch}-${note.velocity}-${note.alpha}-${note.duration}`;
   return token;
+}
+
+function stringify(tokens) {
+  let outputString = '';
+  tokens.forEach((element, i) => {
+    if (i == 0) {
+      outputString += `${element}`;
+    } else {
+      outputString += `|${element}`;
+    }
+  });
+  return outputString;
 }
 
 var _default = generateMap;
