@@ -40,6 +40,7 @@ async function generateMIDI(event) {
     }
     let titlebar = document.getElementById('songTitle')
     titlebar.textContent = 'Creating song...'
+    player.pause();
     try {
         const midiResponse = await axios.post('/generate', { category: category, order: order });
         const midiBuffer = hexToBuffer(midiResponse.data.hex)
