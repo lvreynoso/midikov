@@ -1,7 +1,8 @@
 # midikov
 [Live Demo](https://midikov.herokuapp.com)
 ## About
-A Node.js-based web app to generate MIDI music using markov chains
+A Node.js-based web app to generate MIDI music using Markov chains.
+This is a student project written for Make School's Winter 2019 intensive.
 ## Installing
 * Clone project and run the command `npm install`.
 ## Developing
