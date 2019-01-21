@@ -9,8 +9,7 @@ A Node.js-based web app to generate MIDI music using markov chains
 ## Building
 * Compile with babel using the command `npm run build`. The compiled files will be in
 the `/server` directory.
-
-[//]: <> (No tests yet ## Testing* You can run automated tests using Mocha and Chai with `npm test`.)
-
+## Testing
+No automated tests have been written yet.
 ## Running
 * The compiled project can be run with the command `npm start`.
