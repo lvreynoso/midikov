@@ -8,6 +8,7 @@ const upload = multer({ storage: storage })
 
 // model
 import MIDIFile from '../models/MIDIFile.js'
+import Category from '../models/Category.js'
 
 import readMIDI from '../lib/read-midi.js'
 import pianize from '../lib/pianize.js'
@@ -20,6 +21,16 @@ admin.get('/', (req, res) => {
 
 admin.post('/upload', upload.array('midis', 64), async (req, res) => {
     const category = req.body.category;
+
+    // update category master list
+    let categoryMasterList = await Category.findOne({}).catch(err => { console.log(err) });
+    let categorySet = new Set(categoryMasterList.entries);
+    categorySet.add(category);
+    let newCategories = Array.from(categorySet);
+    categoryMasterList.entries = newCategories;
+    categoryMasterList.save().catch(err => {console.log(err) });
+
+    // process files
     req.files.forEach( async file => {
         let newMidi = new MIDIFile();
         console.log(`Processing ${file.originalname}`);
@@ -35,8 +46,7 @@ admin.post('/upload', upload.array('midis', 64), async (req, res) => {
         let pianoVersion = pianize(midiJS);
         newMidi.data = Buffer.from(pianoVersion.getContent());
 
-        const savedMidi = await newMidi.save().catch(err => { console.log(err); })
-        console.log(savedMidi);
+        newMidi.save().catch(err => { console.log(err); })
     });
     res.redirect('/admin')
 })

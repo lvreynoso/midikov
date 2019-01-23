@@ -27,6 +27,7 @@ const exphbs = handlebars.create(exphbsConfig);
 // middleware
 import checkAuth from './lib/check-auth.js'
 import checkCookie from './lib/check-cookie.js'
+import checkCategoryList from './lib/check-category-list'
 
 // set our express options
 const app = express();
@@ -56,6 +57,9 @@ const hotPort = app.get('port')
 const server = app.listen(hotPort, () => {
     console.log(`App listening on port ${hotPort}!`)
 })
+
+// check for a master category list
+checkCategoryList();
 
 // for Mocha/Chai test purposes
 export default server;
