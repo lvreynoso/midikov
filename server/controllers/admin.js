@@ -15,6 +15,8 @@ var _multer = _interopRequireDefault(require("multer"));
 
 var _MIDIFile = _interopRequireDefault(require("../models/MIDIFile.js"));
 
+var _Category = _interopRequireDefault(require("../models/Category.js"));
+
 var _readMidi = _interopRequireDefault(require("../lib/read-midi.js"));
 
 var _pianize = _interopRequireDefault(require("../lib/pianize.js"));
@@ -39,7 +41,19 @@ admin.get('/', (req, res) => {
   });
 });
 admin.post('/upload', upload.array('midis', 64), async (req, res) => {
-  const category = req.body.category;
+  const category = req.body.category; // update category master list
+
+  let categoryMasterList = await _Category.default.findOne({}).catch(err => {
+    console.log(err);
+  });
+  let categorySet = new Set(categoryMasterList.entries);
+  categorySet.add(category);
+  let newCategories = Array.from(categorySet);
+  categoryMasterList.entries = newCategories;
+  categoryMasterList.save().catch(err => {
+    console.log(err);
+  }); // process files
+
   req.files.forEach(async file => {
     let newMidi = new _MIDIFile.default();
     console.log(`Processing ${file.originalname}`); // let re = /^(.+)(\.[^ .]+)?$/g;
@@ -53,10 +67,9 @@ admin.post('/upload', upload.array('midis', 64), async (req, res) => {
     let midiJS = (0, _readMidi.default)(file.buffer);
     let pianoVersion = (0, _pianize.default)(midiJS);
     newMidi.data = Buffer.from(pianoVersion.getContent());
-    const savedMidi = await newMidi.save().catch(err => {
+    newMidi.save().catch(err => {
       console.log(err);
     });
-    console.log(savedMidi);
   });
   res.redirect('/admin');
 });

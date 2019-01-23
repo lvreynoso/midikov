@@ -33,6 +33,8 @@ var _checkAuth = _interopRequireDefault(require("./lib/check-auth.js"));
 
 var _checkCookie = _interopRequireDefault(require("./lib/check-cookie.js"));
 
+var _checkCategoryList = _interopRequireDefault(require("./lib/check-category-list"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const result = process.env.NODE_ENV == 'development' ? _dotenv.default.config() : false; // dependencies
@@ -64,7 +66,9 @@ app.use('/test', _test.default); // face the world
 const hotPort = app.get('port');
 const server = app.listen(hotPort, () => {
   console.log(`App listening on port ${hotPort}!`);
-}); // for Mocha/Chai test purposes
+}); // check for a master category list
+
+(0, _checkCategoryList.default)(); // for Mocha/Chai test purposes
 
 var _default = server;
 exports.default = _default;
