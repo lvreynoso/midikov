@@ -5,8 +5,8 @@ let exphbsConfig = {
     helpers: {
         // helpers go here
         categoryGenerator: function(context) {
-            console.log(context);
-            console.log(context.data.root.categories);
+            // console.log(context);
+            // console.log(context.data.root.categories);
             let elements = context.data.root.categories;
             let output = '';
             if (elements.length > 0) {
