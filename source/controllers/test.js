@@ -15,7 +15,7 @@ import midiFile from 'midifile'
 import midiEvents from 'midievents'
 import readMIDI from '../lib/read-midi.js'
 import writeMIDI from '../lib/write-midi.js'
-import transformMIDI from '../lib/transform-midi.js'
+import disassembleMIDI from '../lib/disassemble.js'
 import generateMIDI from '../lib/generate-midi.js'
 import analyzeMIDI from '../lib/analyze.js'
 import assembleMIDI from '../lib/assemble.js'
@@ -29,14 +29,14 @@ test.get('/', (req, res) => {
 
 test.get('/generate', async (req, res) => {
     // pull test midis from the data base
-    const testCategory = 'Pokemon';
+    const testCategory = 'test';
     const query = {
         category: testCategory
     };
     const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
     const midiObjects = testMidiDBObjects.map(dbEntry => {
         const convertedMidi = readMIDI(dbEntry.data);
-        const deconstructedMidi = transformMIDI(convertedMidi);
+        const deconstructedMidi = disassembleMIDI(convertedMidi);
         return deconstructedMidi;
     });
     // test with order 1
@@ -54,14 +54,14 @@ test.get('/generate', async (req, res) => {
 
 test.get('/map', async (req, res) => {
     // pull test midis from the data base
-    const testCategory = 'Pokemon';
+    const testCategory = 'test';
     const query = {
         category: testCategory
     };
     const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
     const midiObjects = testMidiDBObjects.map(dbEntry => {
         const convertedMidi = readMIDI(dbEntry.data);
-        const deconstructedMidi = transformMIDI(convertedMidi);
+        const deconstructedMidi = disassembleMIDI(convertedMidi);
         return deconstructedMidi;
     });
     // test with order 1
@@ -84,7 +84,7 @@ test.get('/assemble', async (req, res) => {
     };
     const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
     let testMidi = readMIDI(testMidiDBObjects[0].data);
-    let testNotes = transformMIDI(testMidi);
+    let testNotes = disassembleMIDI(testMidi);
 
     let assembledMidi = assembleMIDI(testNotes);
 
@@ -108,10 +108,10 @@ test.get('/transform', async (req, res) => {
     };
     const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
     let testMidi = readMIDI(testMidiDBObjects[0].data);
-    let testNotes = transformMIDI(testMidi);
-    testNotes.forEach(notes => {
-        // console.log(notes.length);
-    })
+    let testNotes = disassembleMIDI(testMidi);
+    // testNotes.forEach(notes => {
+    //     console.log(notes.length);
+    // })
     // console.log(testNotes);
 
     res.redirect('/test');
@@ -126,6 +126,9 @@ test.get('/analyze', async (req, res) => {
     const testMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
     let testMidi = readMIDI(testMidiDBObjects[0].data);
     let analyzedMIDI = analyzeMIDI(testMidi);
+    if (analyzedMIDI == true) {
+        console.log("Success!");
+    }
 
     res.redirect('/test');
 })

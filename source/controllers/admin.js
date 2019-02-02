@@ -19,7 +19,7 @@ admin.get('/', (req, res) => {
     res.render('admin', { currentUser })
 })
 
-admin.post('/upload', upload.array('midis', 64), async (req, res) => {
+admin.post('/upload', upload.array('midis', 128), async (req, res) => {
     const category = req.body.category;
 
     // update category master list
@@ -41,10 +41,16 @@ admin.post('/upload', upload.array('midis', 64), async (req, res) => {
         newMidi.library = true;
         newMidi.category = category;
 
+
+
+
         // pianize the MIDI file
-        let midiJS = readMIDI(file.buffer);
-        let pianoVersion = pianize(midiJS);
-        newMidi.data = Buffer.from(pianoVersion.getContent());
+        // let midiJS = readMIDI(file.buffer);
+        // let pianoVersion = pianize(midiJS);
+        // newMidi.data = Buffer.from(pianoVersion.getContent());
+
+        // keep the original instruments
+        newMidi.data = Buffer.from(file.buffer)
 
         newMidi.save().catch(err => { console.log(err); })
     });

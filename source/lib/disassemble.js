@@ -8,7 +8,7 @@ import midiEvents from 'midievents'
 
 // don't forget to keep track of how many channels there are too
 
-const transformMIDI = (midi) => {
+const disassemble = (midi) => {
 
     let trackNotes = {};
     let metaData = {
@@ -27,6 +27,10 @@ const transformMIDI = (midi) => {
         metaData.ticksPerFrame = midi.header.getTicksPerFrame();
     }
 
+    // keep track of the instruments
+    // key: channel, value: instrument
+    let instrumentMap = {};
+
     for (let index = 0; index < midi.tracks.length; index++) {
         let notes = [];
         let noteTracker = {};
@@ -44,7 +48,12 @@ const transformMIDI = (midi) => {
             // change of instrument events are called "midi program" events.
             // they are of event type 0x8 and subtype 0xc.
             if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PROGRAM_CHANGE) {
+                instrumentMap[event.channel] = event.param1;
+                // console.log(`Channel ${event.channel} switched to instrument ${event.param1}`);
+                // console.log(instrumentMap);
                 return event;
+            } else if (event.channel == 0x9) {
+                return 99;
             } else if (event.type == midiEvents.EVENT_MIDI && (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON || event.subtype == midiEvents.EVENT_MIDI_NOTE_OFF)) {
                 // midi notes are played by a "note on" event and they end when a "note off" event is called.
                 // they are of event type 0x8 and subtypes 0x9 for 'note on' and 0x8 for 'note off'.
@@ -68,7 +77,9 @@ const transformMIDI = (midi) => {
 
                 // put a new note in the tracker
                 if (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON) {
-                    let newNote = new Note(event, deltaTime, alpha);
+                    let instrument = instrumentMap[event.channel];
+                    let newNote = new Note(event, deltaTime, alpha, instrument);
+                    // console.log(newNote);
                     noteTracker[event.param1] = newNote;
                     alpha = 0x000000;
                 }
@@ -116,14 +127,24 @@ const transformMIDI = (midi) => {
                 return event;
             } else {
                 // console.log(event);
-                return event;
+                return 99;
             }
         });
-        // console.log(`Track ${index} has ${newTrackEvents.length} events.`);
-        // let leftovers = Object.keys(noteTracker);
-        // console.log(`Note tracker has ${leftovers.length} leftovers.`)
+
         // console.log(notes);
-        trackNotes[index] = notes;
+
+        // trim extraneous events
+        let filteredNotes = notes.filter(element => {
+            if (element == 99) {
+                return false
+            } else {
+                return true
+            }
+        })
+
+        // console.log(noteTracker);
+
+        trackNotes[index] = filteredNotes;
     }
     // console.log(trackNotes);
     // trim empty tracks
@@ -142,11 +163,12 @@ const transformMIDI = (midi) => {
 }
 
 class Note {
-    constructor(event, time, alpha) {
+    constructor(event, time, alpha, instrument) {
         this.pitch = event.param1;
         this.velocity = event.param2;
         this.alpha = alpha;
         this.channel = event.channel;
+        this.instrument = instrument;
         this.startIndex = time;
         this.endIndex = 0x000000;
         this.duration = 0x000000;
@@ -158,4 +180,4 @@ class Note {
     }
 }
 
-export default transformMIDI;
+export default disassemble;

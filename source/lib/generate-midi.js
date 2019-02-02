@@ -55,8 +55,6 @@ const generate = (markovData, order, category) => {
         scale: parseInt(keyScaleArray[1], 10)
     }
     // console.log(keyScaleArray);
-    // keySignature.key = parseInt(keyScaleArray[0], 10);
-    // keySignature.scale = parseInt(keyScaleArray[1], 10);
     metaData.keySignature = keySignature;
 
     // time signature
@@ -81,11 +79,6 @@ const generate = (markovData, order, category) => {
         param3: timeDataArray[2],
         param4: timeDataArray[3]
     }
-    // timeSignature.data = timeDataArray;
-    // timeSignature.param1 = timeDataArray[0];
-    // timeSignature.param2 = timeDataArray[1];
-    // timeSignature.param3 = timeDataArray[2];
-    // timeSignature.param4 = timeDataArray[3];
     metaData.timeSignature = timeSignature;
 
     // tempo event
@@ -110,10 +103,6 @@ const generate = (markovData, order, category) => {
 
     let tracks = {};
     // now we generate each track
-    // let firstTrack = generateTrack(markovData.map, order, 450)
-    // tracks[1] = firstTrack;
-    // console.log('1 track written');
-    // console.log(tracks);
     for (let i = 1; i < 4; i++) {
         tracks[i] = generateTrack(markovData.map, order, 450)
     }
@@ -195,12 +184,9 @@ function generateTrack(noteMap, markovOrder, distance) {
             pitch: parseInt(decodedNote[0], 10),
             velocity: parseInt(decodedNote[1], 10),
             alpha: parseInt(decodedNote[2], 10),
-            duration: parseInt(decodedNote[3], 10)
+            duration: parseInt(decodedNote[3], 10),
+            instrument: parseInt(decodedNote[4], 10)
         }
-        // note.pitch = parseInt(decodedNote[0], 10)
-        // note.velocity = parseInt(decodedNote[1], 10)
-        // note.alpha = parseInt(decodedNote[2], 10)
-        // note.duration = parseInt(decodedNote[3], 10)
         trackNotes.push(note);
 
         // debugging

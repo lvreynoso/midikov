@@ -173,7 +173,9 @@ const generateMap = (midiArray, order, category) => {
 }
 
 function tokenize(note) {
-    let token = `${note.pitch}-${note.velocity}-${note.alpha}-${note.duration}`
+    // console.log(note);
+    let token = `${note.pitch}-${note.velocity}-${note.alpha}-${note.duration}-${note.instrument}`
+    // console.log(token);
     return token;
 }
 

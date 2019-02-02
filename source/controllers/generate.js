@@ -15,7 +15,7 @@ import midiFile from 'midifile'
 import midiEvents from 'midievents'
 import readMIDI from '../lib/read-midi.js'
 import writeMIDI from '../lib/write-midi.js'
-import transformMIDI from '../lib/transform-midi.js'
+import disassembleMIDI from '../lib/disassemble.js'
 import generateMIDI from '../lib/generate-midi.js'
 import assembleMIDI from '../lib/assemble.js'
 import generateMap from '../lib/generate-map.js'
@@ -32,7 +32,7 @@ generate.post('/', async (req, res) => {
     const categoryMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
     const midiObjects = categoryMidiDBObjects.map(dbEntry => {
         const convertedMidi = readMIDI(dbEntry.data);
-        const deconstructedMidi = transformMIDI(convertedMidi);
+        const deconstructedMidi = disassembleMIDI(convertedMidi);
         return deconstructedMidi;
     });
     let failed = false;
@@ -57,22 +57,15 @@ generate.post('/', async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        failed = true;
-    } finally {
-        if (failed) {
-            res.status(500);
-        } else {
-            // send the data
-            const generatedObject = {
-                title: `${category} - Generated Order ${order}`,
-                hex: generatedHex,
-                path: '/temp/test.midi'
-            }
-            const generatedJSON = JSON.stringify(generatedObject);
-            res.status(200).send(generatedJSON);
-        }
+        return res.status(500);
     }
-
+    const generatedObject = {
+        title: `${category} Song - Order ${order}`,
+        hex: generatedHex,
+        path: '/temp/test.midi'
+    }
+    const generatedJSON = JSON.stringify(generatedObject);
+    res.status(200).send(generatedJSON);
 });
 
 

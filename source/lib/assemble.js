@@ -92,7 +92,7 @@ const assemble = (midiData) => {
         outputMidi.addTrack(trackIndex);
         let trackNotes = midiData.trackNotes[trackIndex];
         // gets the wrong channel for some reason
-        let trackChannel = parseInt(trackIndex, 16);
+        let trackChannel = parseInt(trackIndex, 10);
         // console.log(`Instrument Channel: ${trackChannel}`);
         // all track events
         let trackEvents = [];
@@ -106,6 +106,16 @@ const assemble = (midiData) => {
         //     key: 0x00,
         //     scale: 0x00
         // }
+
+        if (trackKeySignature != undefined) {
+            trackEvents.push(trackKeySignature);
+        }
+        // trackEvents.push(trackProgram);
+
+        // convert each 'Note' to a pair of MIDI events: note on and note off.
+        // if the note's instrument does not match the current program,
+        // then change programs with a new event.
+
         // Program Change (Set the instrument)
         let trackProgram = {
             delta: 0x00,
@@ -114,12 +124,6 @@ const assemble = (midiData) => {
             channel: trackChannel,
             param1: 0x00
         }
-        if (trackKeySignature != undefined) {
-            trackEvents.push(trackKeySignature);
-        }
-        trackEvents.push(trackProgram);
-
-        // convert each 'Note' to a pair of MIDI events: note on and note off.
 
         let noteOnTemplate = {
             delta: 0x00,
@@ -143,18 +147,26 @@ const assemble = (midiData) => {
         // create all the events at the proper 'tick'
         // THEN go through the hashmap and assemble events
         // calculate deltas by the distance between ticks
-        // apparently Javascript has problems with hexadecimal math
+        // apparently Javascript doesn't distinguish well between hex and decimals
         // so ticks are in decimal numbers. seems to work...
         let noteTracker = {};
         let ticks = 0;
+        let currentInstrument = 0x00;
         trackNotes.forEach(note => {
-            // if (note.alpha > 0x300) {
-            //     note.alpha = 0x300;
-            // }
-            // if (note.duration > 0x300) {
-            //     note.duration = 0x300;
-            // }
             ticks += note.alpha;
+
+            // check the instrument
+            if (note.instrument != currentInstrument) {
+                let programChange = Object.assign({}, trackProgram);
+                programChange.param1 = note.instrument;
+                if (noteTracker[ticks] == undefined) {
+                    noteTracker[ticks] = [programChange];
+                } else {
+                    noteTracker[ticks].push(programChange);
+                }
+                currentInstrument = note.instrument;
+            }
+
             // add the on event
             let noteOn = Object.assign({}, noteOnTemplate);
             noteOn.channel = trackChannel;
@@ -187,9 +199,10 @@ const assemble = (midiData) => {
             let currentTime = parseInt(time, 10);
             noteTracker[time].forEach(event => {
                 event.delta = currentTime - previousTick;
-                // if (event.delta > 0x300) {
-                //     console.log(event);
-                // }
+                // for the weird stuff
+                if (event.delta < 0) {
+                    console.log(event);
+                }
                 trackEvents.push(event);
                 previousTick = currentTime;
             })

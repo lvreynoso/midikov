@@ -22,6 +22,7 @@ const analyze = (midi) => {
     for (let index = 0; index < midi.tracks.length; index++) {
         outputMidi.addTrack(index);
         let trackEvents = midi.getTrackEvents(index);
+        let channelMap = {};
         let newTrackEvents = trackEvents.map(event => {
             // change of instrument events are called "midi program" events.
             // they are of event type 0x8 and subtype 0xc.
@@ -29,6 +30,8 @@ const analyze = (midi) => {
                 // event.param1 = 0;
                 // console.log('MIDI Program Change Event');
                 // console.log(event);
+                channelMap[event.channel] = event.param1;
+                console.log(`Channel ${event.channel} switched to instrument ${event.param1}`);
                 return event;
             } else if (event.channel == 0x9) {
                 // percussion instruments live in event channel 0x9.
@@ -50,6 +53,7 @@ const analyze = (midi) => {
                 //     console.log(`${note} stopped ${event.delta} clocks after the preceding event.`);
                 // }
                 // console.log(event.delta);
+                // console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER) {
                 // synthesizer effects are applied by midi controller events. they are of type 0x8
@@ -71,8 +75,8 @@ const analyze = (midi) => {
                 // the tempo parameter is the number of microseconds per quarter note.
                 // Divide 60,000,000 / this parameter and you get the bpm of the song.
                 // TRACK 0
-                console.log(`SET TEMPO event on Track ${index}`);
-                console.log(event);
+                // console.log(`SET TEMPO event on Track ${index}`);
+                // console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_MARKER) {
                 // this midi 'meta' marker event is simply a marker - it does the same function
@@ -90,8 +94,8 @@ const analyze = (midi) => {
                 // 4: number of notated 32nd notes in a MIDI quarter-note. usually 8.
                 // type: 0xff, subtype: 0x58
                 // TRACK 0
-                console.log(`Set time signature on Track ${index}`);
-                console.log(event);
+                // console.log(`Set time signature on Track ${index}`);
+                // console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_KEY_SIGNATURE) {
                 // this event has two properties: key and scale. the key property specifies
@@ -100,8 +104,8 @@ const analyze = (midi) => {
                 // the scale property is 0 for a major key, and 1 for a minor key.
                 // type: 0xff, subtype: 0x59
                 // TRACK 0
-                console.log(`Set key signature on Track ${index}`);
-                console.log(event);
+                // console.log(`Set key signature on Track ${index}`);
+                // console.log(event);
                 return event;
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PITCH_BEND) {
                 // fancy pitch bending. type 0x08, subtype 0xe.
@@ -128,22 +132,9 @@ const analyze = (midi) => {
                 return event;
             }
         });
-        // let filteredTrackEvents = newTrackEvents.filter(element => {
-        //     if (element == 99) {
-        //         return false
-        //     } else {
-        //         return true
-        //     }
-        // })
         console.log(`Track ${index} has ${newTrackEvents.length} events.`);
-        // if (index == 0 || index == 4 || index == 5) {
-        //     filteredTrackEvents.forEach(element => {
-        //         console.log(element);
-        //     })
-        // }
-        outputMidi.setTrackEvents(index, newTrackEvents);
     }
-    return outputMidi;
+    return true;
 }
 
 export default analyze;
