@@ -40,10 +40,10 @@ async function generateMIDI(event) {
     }
     let titlebar = document.getElementById('songTitle')
     // console.log(titlebar);
-    let spinner = new Image(64, 64)
+    let spinner = new Image(24, 24)
     spinner.src = 'img/spinner.gif'
-    titlebar.appendChild(spinner);
     titlebar.textContent = 'Creating song...'
+    titlebar.appendChild(spinner);
     player.pause();
     try {
         const midiResponse = await axios.post('/generate', { category: category, order: order });
