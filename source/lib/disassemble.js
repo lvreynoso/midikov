@@ -27,9 +27,8 @@ const disassemble = (midi) => {
         metaData.ticksPerFrame = midi.header.getTicksPerFrame();
     }
 
-    // keep track of the instruments
-    // key: channel, value: instrument
-    let instrumentMap = {};
+    // keep a list of what instruments are used
+    let instruments = [];
 
     for (let index = 0; index < midi.tracks.length; index++) {
         let notes = [];
@@ -48,7 +47,7 @@ const disassemble = (midi) => {
             // change of instrument events are called "midi program" events.
             // they are of event type 0x8 and subtype 0xc.
             if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PROGRAM_CHANGE) {
-                instrumentMap[event.channel] = event.param1;
+                instruments.push(event.param1)
                 // console.log(`Channel ${event.channel} switched to instrument ${event.param1}`);
                 // console.log(instrumentMap);
                 return 99;
@@ -77,8 +76,7 @@ const disassemble = (midi) => {
 
                 // put a new note in the tracker
                 if (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON) {
-                    let instrument = instrumentMap[event.channel];
-                    let newNote = new Note(event, deltaTime, alpha, instrument);
+                    let newNote = new Note(event, deltaTime, alpha);
                     // console.log(newNote);
                     noteTracker[event.param1] = newNote;
                     alpha = 0x000000;
@@ -157,7 +155,8 @@ const disassemble = (midi) => {
     });
     let midiData = {
         trackNotes: trackNotes,
-        metaData: metaData
+        metaData: metaData,
+        instruments: instruments
     }
     return midiData;
 }
@@ -168,7 +167,6 @@ class Note {
         this.velocity = event.param2;
         this.alpha = alpha;
         this.channel = event.channel;
-        this.instrument = instrument;
         this.startIndex = time;
         this.endIndex = 0x000000;
         this.duration = 0x000000;

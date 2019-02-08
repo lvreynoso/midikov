@@ -21,6 +21,7 @@ import assembleMIDI from '../lib/assemble.js'
 import generateMap from '../lib/generate-map.js'
 
 generate.post('/', async (req, res) => {
+    let success = true;
     // pull the midi from the database
     const category = req.body.category;
     const order = parseInt(req.body.order.split(' ')[1], 10);
@@ -29,15 +30,16 @@ generate.post('/', async (req, res) => {
         category: category
     }
 
-    const categoryMidiDBObjects = await MIDIFile.find(query).catch(err => { console.log(err) });
-    const midiObjects = categoryMidiDBObjects.map(dbEntry => {
-        const convertedMidi = readMIDI(dbEntry.data);
-        const deconstructedMidi = disassembleMIDI(convertedMidi);
-        return deconstructedMidi;
+    const categoryMidiDBObjects = await MIDIFile.find(query).catch(err => {
+        console.log(err)
     });
-    let failed = false;
     let generatedHex = '';
     try {
+        const midiObjects = categoryMidiDBObjects.map(dbEntry => {
+            const convertedMidi = readMIDI(dbEntry.data);
+            const deconstructedMidi = disassembleMIDI(convertedMidi);
+            return deconstructedMidi;
+        });
         // console.log(midiObjects);
         const markovData = generateMap(midiObjects, order, category);
         const generatedSong = generateMIDI(markovData, order, category);
@@ -57,7 +59,9 @@ generate.post('/', async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500);
+        return res.status(500).send({
+            message: "500 Error - Something went wrong."
+        })
     }
     const generatedObject = {
         title: `${category} Song - Order ${order}`,
@@ -65,7 +69,7 @@ generate.post('/', async (req, res) => {
         path: '/temp/test.midi'
     }
     const generatedJSON = JSON.stringify(generatedObject);
-    res.status(200).send(generatedJSON);
+    return res.status(200).send(generatedJSON);
 });
 
 

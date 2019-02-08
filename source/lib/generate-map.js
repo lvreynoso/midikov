@@ -20,6 +20,21 @@ const generateMap = (midiArray, order, category) => {
     // and the first part of that - shove all the notes together.
     // we convert them to strings for easier comparison and storage.
     let tokenArray = [];
+    // along the way we collect the meta information
+    // i'm just going to do a very simple statistical sampling
+    // our meta data structure
+    let markovMetaData = {
+        ticksPerBeat: {},
+        SMPTEFrames: {},
+        ticksPerFrame: {},
+        keySignature: {},
+        timeSignature: {},
+        tempo: {}
+    }
+
+    // just a list of all the instruments used in the category
+    let instrumentCatalog = [];
+
     midiArray.forEach(song => {
         // get a list of tracks
         let trackNumbers = Object.keys(song.trackNotes);
@@ -36,20 +51,72 @@ const generateMap = (midiArray, order, category) => {
             })
             tokenArray.push(STOP_TOKEN);
         })
+        // copy the meta properties
+        let meta = song.metaData;
+        let properties = Object.keys(song.metaData);
+        properties.forEach(property => {
+            if (meta[property] != undefined) {
+                let rawData = meta[property];
+                let dataPoint = ''
+                // what we copy depends on the property
+                switch (property) {
+                    case 'ticksPerBeat':
+                    case 'SMPTEFrames':
+                    case 'ticksPerFrame':
+                        dataPoint = rawData;
+                        break;
+                    case 'keySignature':
+                        dataPoint = `${rawData.key}-${rawData.scale}`;
+                        break;
+                    case 'timeSignature':
+                        dataPoint = `${rawData.param1}-${rawData.param2}-${rawData.param3}-${rawData.param4}`;
+                        break;
+                    case 'tempo':
+                        dataPoint = `${rawData.tempo}`;
+                        break;
+                    default:
+                        break;
+                }
+                if (markovMetaData[property][dataPoint] == undefined) {
+                    markovMetaData[property][dataPoint] = 1;
+                } else {
+                    markovMetaData[property][dataPoint] += 1;
+                }
+            }
+        });
+        // for instruments I don't want to do a weighted choice, so I just
+        // aggregate the instruments in a big array (then remove duplicates later)
+        song.instruments.forEach(instrument => {
+            instrumentCatalog.push(instrument)
+        })
     })
     // now we should have an array of note tokens.
     // console.log(tokenArray);
     // indeed we do.
 
+    // remove duplicates from the instrument catalog
+    let seen = {};
+    let filteredInstruments = instrumentCatalog.filter(element => {
+        if (seen.hasOwnProperty(element)) {
+            return false;
+        } else {
+            seen[element] = true;
+            return true;
+        }
+    });
+
+    // console.log("Instruments:");
+    // console.log(filteredInstruments);
+
     // second - we go through the tokens and build up a markov map.
     // it's better in the original python.
     let markovMap = {};
     let startingItems = [];
-    console.log(`Order: ${order}`);
+    // console.log(`Order: ${order}`);
     for (let n = 0; n < order; n++) {
         startingItems.push(tokenArray[n]);
     }
-    console.log(`Starting items: ${startingItems}`);
+    // console.log(`Starting items: ${startingItems}`);
     let stateTracker = new Queue(order);
     startingItems.forEach(item => {
         stateTracker.enqueue(item);
@@ -59,7 +126,7 @@ const generateMap = (midiArray, order, category) => {
     // since javascript does not have tuples and arrays cannot be used
     // as keys in an object, we need to transform the state into a string
     // where tokens are separated by a pipe '|'
-    console.log(stateTracker.items());
+    // console.log(stateTracker.items());
     let state = stringify(stateTracker.items());
 
 
@@ -101,55 +168,6 @@ const generateMap = (midiArray, order, category) => {
     // did it work?
     // yes it did. wow.
 
-    // ok now we have to collect the meta information
-    // i'm just going to do a very simple statistical sampling
-
-    // our data structure
-    let markovMetaData = {
-        ticksPerBeat: {},
-        SMPTEFrames: {},
-        ticksPerFrame: {},
-        keySignature: {},
-        timeSignature: {},
-        tempo: {}
-    }
-
-    // copy the meta properties
-    midiArray.forEach(song => {
-        let meta = song.metaData;
-        let properties = Object.keys(meta);
-        properties.forEach(property => {
-            if (meta[property] != undefined) {
-                let rawData = meta[property];
-                let dataPoint = ''
-                // what we copy depends on the property
-                switch (property) {
-                    case 'ticksPerBeat':
-                    case 'SMPTEFrames':
-                    case 'ticksPerFrame':
-                        dataPoint = rawData;
-                        break;
-                    case 'keySignature':
-                        dataPoint = `${rawData.key}-${rawData.scale}`;
-                        break;
-                    case 'timeSignature':
-                        dataPoint = `${rawData.param1}-${rawData.param2}-${rawData.param3}-${rawData.param4}`;
-                        break;
-                    case 'tempo':
-                        dataPoint = `${rawData.tempo}`;
-                        break;
-                    default:
-                        break;
-                }
-                if (markovMetaData[property][dataPoint] == undefined) {
-                    markovMetaData[property][dataPoint] = 1;
-                } else {
-                    markovMetaData[property][dataPoint] += 1;
-                }
-            }
-        });
-    });
-
     // write metadata to disk
     // let metaStringMap = JSON.stringify(markovMetaData);
     // let metaFilename = `${category}_${order}.meta`
@@ -166,7 +184,8 @@ const generateMap = (midiArray, order, category) => {
 
     let markovData = {
         map: markovMap,
-        meta: markovMetaData
+        meta: markovMetaData,
+        instruments: filteredInstruments
     };
 
     return markovData;
@@ -174,7 +193,7 @@ const generateMap = (midiArray, order, category) => {
 
 function tokenize(note) {
     // console.log(note);
-    let token = `${note.pitch}-${note.velocity}-${note.alpha}-${note.duration}-${note.instrument}`
+    let token = `${note.pitch}-${note.velocity}-${note.alpha}-${note.duration}`
     // console.log(token);
     return token;
 }
