@@ -106,7 +106,7 @@ const generate = (markovData, order, category) => {
     // now we generate each track
     for (let i = 1; i < 7; i++) {
         tracks[i] = generateTrack(markovData.map, order, 450);
-        instruments[i] = markovData.instruments[~~(Math.random() * markovData.instruments.length)]
+        instruments[i] = weightedChoice(markovData.instruments)
         // ~~ is equivalent to Math.floor()
     }
 

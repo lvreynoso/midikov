@@ -33,7 +33,7 @@ const generateMap = (midiArray, order, category) => {
     }
 
     // just a list of all the instruments used in the category
-    let instrumentCatalog = [];
+    let instrumentCatalog = {};
 
     midiArray.forEach(song => {
         // get a list of tracks
@@ -84,10 +84,13 @@ const generateMap = (midiArray, order, category) => {
                 }
             }
         });
-        // for instruments I don't want to do a weighted choice, so I just
-        // aggregate the instruments in a big array (then remove duplicates later)
+        // LOL NVM NOW ITS WEIGHTED CHOICE
         song.instruments.forEach(instrument => {
-            instrumentCatalog.push(instrument)
+            if (instrumentCatalog[instrument] == undefined) {
+                instrumentCatalog[instrument] = 1;
+            } else {
+                instrumentCatalog[instrument] += 1;
+            }
         })
     })
     // now we should have an array of note tokens.
@@ -95,15 +98,15 @@ const generateMap = (midiArray, order, category) => {
     // indeed we do.
 
     // remove duplicates from the instrument catalog
-    let seen = {};
-    let filteredInstruments = instrumentCatalog.filter(element => {
-        if (seen.hasOwnProperty(element)) {
-            return false;
-        } else {
-            seen[element] = true;
-            return true;
-        }
-    });
+    // let seen = {};
+    // let filteredInstruments = instrumentCatalog.filter(element => {
+    //     if (seen.hasOwnProperty(element)) {
+    //         return false;
+    //     } else {
+    //         seen[element] = true;
+    //         return true;
+    //     }
+    // });
 
     // console.log("Instruments:");
     // console.log(filteredInstruments);
@@ -185,7 +188,7 @@ const generateMap = (midiArray, order, category) => {
     let markovData = {
         map: markovMap,
         meta: markovMetaData,
-        instruments: filteredInstruments
+        instruments: instrumentCatalog
     };
 
     return markovData;
