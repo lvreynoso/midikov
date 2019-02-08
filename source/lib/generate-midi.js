@@ -32,10 +32,10 @@ const generate = (markovData, order, category) => {
         metaData.ticksPerBeat = weightedChoice(markovData.meta['ticksPerBeat']);
     }
     if (Object.getOwnPropertyNames(markovData.meta['SMPTEFrames']).length > 0) {
-        metaData.ticksPerBeat = weightedChoice(markovData.meta['SMPTEFrames']);
+        metaData.SMPTEFrames = weightedChoice(markovData.meta['SMPTEFrames']);
     }
     if (Object.getOwnPropertyNames(markovData.meta['ticksPerFrame']).length > 0) {
-        metaData.ticksPerBeat = weightedChoice(markovData.meta['ticksPerFrame']);
+        metaData.ticksPerFrame = weightedChoice(markovData.meta['ticksPerFrame']);
     }
 
     // now to build events for the key and time signatures, and the tempo.
