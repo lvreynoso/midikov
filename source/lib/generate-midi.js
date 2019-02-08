@@ -103,7 +103,7 @@ const generate = (markovData, order, category) => {
 
     let tracks = {};
     // now we generate each track
-    for (let i = 1; i < 4; i++) {
+    for (let i = 1; i < 7; i++) {
         tracks[i] = generateTrack(markovData.map, order, 450)
     }
 
