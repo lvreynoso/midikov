@@ -32,10 +32,10 @@ const generate = (markovData, order, category) => {
         metaData.ticksPerBeat = weightedChoice(markovData.meta['ticksPerBeat']);
     }
     if (Object.getOwnPropertyNames(markovData.meta['SMPTEFrames']).length > 0) {
-        metaData.ticksPerBeat = weightedChoice(markovData.meta['SMPTEFrames']);
+        metaData.SMPTEFrames = weightedChoice(markovData.meta['SMPTEFrames']);
     }
     if (Object.getOwnPropertyNames(markovData.meta['ticksPerFrame']).length > 0) {
-        metaData.ticksPerBeat = weightedChoice(markovData.meta['ticksPerFrame']);
+        metaData.ticksPerFrame = weightedChoice(markovData.meta['ticksPerFrame']);
     }
 
     // now to build events for the key and time signatures, and the tempo.
@@ -102,14 +102,18 @@ const generate = (markovData, order, category) => {
 
 
     let tracks = {};
+    let instruments = {};
     // now we generate each track
-    for (let i = 1; i < 4; i++) {
-        tracks[i] = generateTrack(markovData.map, order, 450)
+    for (let i = 1; i < 7; i++) {
+        tracks[i] = generateTrack(markovData.map, order, 450);
+        instruments[i] = weightedChoice(markovData.instruments)
+        // ~~ is equivalent to Math.floor()
     }
 
     let generatedSong = {
         trackNotes: tracks,
-        metaData: metaData
+        metaData: metaData,
+        instruments: instruments
     }
 
     return generatedSong;
@@ -134,8 +138,8 @@ function generateTrack(noteMap, markovOrder, distance) {
     // console.log(`Starting possibilities: ${startingPossibilities}`);
     let state = startingPossibilities[Math.floor(Math.random() * startingPossibilities.length)];
     state = state.split('|')
-    console.log(`First state:`);
-    console.log(state);
+    // console.log(`First state:`);
+    // console.log(state);
     state.forEach(token => {
         stateQueue.enqueue(token);
     });
@@ -185,14 +189,13 @@ function generateTrack(noteMap, markovOrder, distance) {
             velocity: parseInt(decodedNote[1], 10),
             alpha: parseInt(decodedNote[2], 10),
             duration: parseInt(decodedNote[3], 10),
-            instrument: parseInt(decodedNote[4], 10)
         }
         trackNotes.push(note);
 
         // debugging
-        if (trackNotes.length == 1) {
+        // if (trackNotes.length == 1) {
             // console.log(trackNotes);
-        }
+        // }
     }
     return trackNotes;
 }

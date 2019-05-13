@@ -27,9 +27,8 @@ const disassemble = (midi) => {
         metaData.ticksPerFrame = midi.header.getTicksPerFrame();
     }
 
-    // keep track of the instruments
-    // key: channel, value: instrument
-    let instrumentMap = {};
+    // keep a list of what instruments are used
+    let instruments = [];
 
     for (let index = 0; index < midi.tracks.length; index++) {
         let notes = [];
@@ -48,10 +47,10 @@ const disassemble = (midi) => {
             // change of instrument events are called "midi program" events.
             // they are of event type 0x8 and subtype 0xc.
             if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_PROGRAM_CHANGE) {
-                instrumentMap[event.channel] = event.param1;
+                instruments.push(event.param1)
                 // console.log(`Channel ${event.channel} switched to instrument ${event.param1}`);
                 // console.log(instrumentMap);
-                return event;
+                return 99;
             } else if (event.channel == 0x9) {
                 return 99;
             } else if (event.type == midiEvents.EVENT_MIDI && (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON || event.subtype == midiEvents.EVENT_MIDI_NOTE_OFF)) {
@@ -77,8 +76,7 @@ const disassemble = (midi) => {
 
                 // put a new note in the tracker
                 if (event.subtype == midiEvents.EVENT_MIDI_NOTE_ON) {
-                    let instrument = instrumentMap[event.channel];
-                    let newNote = new Note(event, deltaTime, alpha, instrument);
+                    let newNote = new Note(event, deltaTime, alpha);
                     // console.log(newNote);
                     noteTracker[event.param1] = newNote;
                     alpha = 0x000000;
@@ -88,10 +86,10 @@ const disassemble = (midi) => {
             } else if (event.type == midiEvents.EVENT_MIDI && event.subtype == midiEvents.EVENT_MIDI_CONTROLLER){
                 // synthesizer effects are applied by midi controller events. they are of type 0x8
                 // and subtype 0xb, and affect all tracks.
-                return event;
+                return 99;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_END_OF_TRACK) {
                 // the end of a track is signalled by an event of type 0xff and subtype 0x2f.
-                return event;
+                return 99;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_SET_TEMPO) {
                 // this is a meta midi event that sets the tempo (bpm) of the entire song (all tracks).
                 // they are of type 0xff and subtype 0x51.
@@ -101,7 +99,7 @@ const disassemble = (midi) => {
                 if (metaData.tempo == undefined) {
                     metaData.tempo = event;
                 }
-                return event;
+                return 99;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_TIME_SIGNATURE) {
                 // used to change the time signature of a track. parameters are as follows:
                 // 1: numerator of the time signature
@@ -113,7 +111,7 @@ const disassemble = (midi) => {
                 if (metaData.timeSignature == undefined) {
                     metaData.timeSignature = event;
                 }
-                return event;
+                return 99;
             } else if (event.type == midiEvents.EVENT_META && event.subtype == midiEvents.EVENT_META_KEY_SIGNATURE) {
                 // this event has two properties: key and scale. the key property specifies
                 // the number of flats (negative number) or number of sharps (positive). a key of
@@ -124,7 +122,7 @@ const disassemble = (midi) => {
                 if (metaData.keySignature == undefined) {
                     metaData.keySignature = event;
                 }
-                return event;
+                return 99;
             } else {
                 // console.log(event);
                 return 99;
@@ -157,7 +155,8 @@ const disassemble = (midi) => {
     });
     let midiData = {
         trackNotes: trackNotes,
-        metaData: metaData
+        metaData: metaData,
+        instruments: instruments
     }
     return midiData;
 }
@@ -168,7 +167,6 @@ class Note {
         this.velocity = event.param2;
         this.alpha = alpha;
         this.channel = event.channel;
-        this.instrument = instrument;
         this.startIndex = time;
         this.endIndex = 0x000000;
         this.duration = 0x000000;

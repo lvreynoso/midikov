@@ -110,11 +110,6 @@ const assemble = (midiData) => {
         if (trackKeySignature != undefined) {
             trackEvents.push(trackKeySignature);
         }
-        // trackEvents.push(trackProgram);
-
-        // convert each 'Note' to a pair of MIDI events: note on and note off.
-        // if the note's instrument does not match the current program,
-        // then change programs with a new event.
 
         // Program Change (Set the instrument)
         let trackProgram = {
@@ -122,8 +117,13 @@ const assemble = (midiData) => {
             type: 0x08,
             subtype: 0x0c,
             channel: trackChannel,
-            param1: 0x00
+            param1: midiData.instruments[trackChannel]
         }
+        trackEvents.push(trackProgram);
+
+        // convert each 'Note' to a pair of MIDI events: note on and note off.
+        // if the note's instrument does not match the current program,
+        // then change programs with a new event.
 
         let noteOnTemplate = {
             delta: 0x00,
@@ -156,16 +156,16 @@ const assemble = (midiData) => {
             ticks += note.alpha;
 
             // check the instrument
-            if (note.instrument != currentInstrument) {
-                let programChange = Object.assign({}, trackProgram);
-                programChange.param1 = note.instrument;
-                if (noteTracker[ticks] == undefined) {
-                    noteTracker[ticks] = [programChange];
-                } else {
-                    noteTracker[ticks].push(programChange);
-                }
-                currentInstrument = note.instrument;
-            }
+            // if (note.instrument != currentInstrument) {
+            //     let programChange = Object.assign({}, trackProgram);
+            //     programChange.param1 = note.instrument;
+            //     if (noteTracker[ticks] == undefined) {
+            //         noteTracker[ticks] = [programChange];
+            //     } else {
+            //         noteTracker[ticks].push(programChange);
+            //     }
+            //     currentInstrument = note.instrument;
+            // }
 
             // add the on event
             let noteOn = Object.assign({}, noteOnTemplate);
